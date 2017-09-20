@@ -36,6 +36,8 @@
 @property(nonatomic, strong) IBOutlet UILabel* hsLabel;
 @property(nonatomic, strong) IBOutlet UILabel* vsLabel;
 @property(nonatomic, strong) IBOutlet UILabel* altitudeLabel;
+@property (weak, nonatomic) IBOutlet UIButton *drop;
+
 
 @property(nonatomic, strong) DJIMutableWaypointMission* waypointMission;
 @end
@@ -56,7 +58,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
     [self registerApp];
     
     [self initUI];
@@ -401,6 +402,7 @@
     double radianYaw = RADIAN(state.attitude.yaw);
     [self.mapController updateAircraftHeading:radianYaw];
 }
+
 
 
 @end

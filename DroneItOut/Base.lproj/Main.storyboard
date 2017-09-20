@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="landscape">
         <adaptation id="fullscreen"/>
     </device>
@@ -21,14 +21,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="gkc-2y-dBR">
-                                <rect key="frame" x="0.0" y="72" width="667" height="303"/>
+                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="gkc-2y-dBR">
+                                <rect key="frame" x="0.0" y="0.0" width="667" height="303"/>
                                 <connections>
                                     <outlet property="delegate" destination="BYZ-38-t0r" id="f45-gf-bRE"/>
                                 </connections>
                             </mapView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tdE-bu-rKa" userLabel="top bar">
-                                <rect key="frame" x="0.0" y="0.0" width="667" height="72"/>
+                            <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tdE-bu-rKa" userLabel="top bar">
+                                <rect key="frame" x="0.0" y="303" width="667" height="72"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Mode:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jZg-x9-i4y">
                                         <rect key="frame" x="8" y="36" width="42" height="21"/>
@@ -100,6 +100,13 @@
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WOm-dG-d6t" customClass="DropMenuButton">
+                                        <rect key="frame" x="584" y="27" width="47" height="30"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                        <state key="normal" title="Modes"/>
+                                    </button>
                                 </subviews>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
@@ -129,6 +136,7 @@
                     </view>
                     <connections>
                         <outlet property="altitudeLabel" destination="XlO-A1-74V" id="TDA-yZ-A3I"/>
+                        <outlet property="drop" destination="WOm-dG-d6t" id="EPk-h7-Mey"/>
                         <outlet property="gpsLabel" destination="nRm-HP-kS1" id="OHZ-uq-C4a"/>
                         <outlet property="hsLabel" destination="lqV-hZ-fjF" id="XLN-T6-cxM"/>
                         <outlet property="mapView" destination="gkc-2y-dBR" id="aHB-ri-bcH"/>
@@ -140,7 +148,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-589.43661971830988" y="-455.625"/>
+            <point key="canvasLocation" x="-589.65517241379314" y="-456.80000000000001"/>
         </scene>
     </scenes>
 </document>

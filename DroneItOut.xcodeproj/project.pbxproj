@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		69CE51B131FF2EFF2E187B8E /* libPods-DroneItOut.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */; };
+		9714A2C31F724A7300E0C9C5 /* droneimages in Resources */ = {isa = PBXBuildFile; fileRef = 9714A2C21F724A7300E0C9C5 /* droneimages */; };
+		9714A2C71F724A8A00E0C9C5 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 9714A2C41F724A8A00E0C9C5 /* GameScene.sks */; };
+		9714A2C81F724A8A00E0C9C5 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9714A2C51F724A8A00E0C9C5 /* GameScene.swift */; };
+		9714A2C91F724A8A00E0C9C5 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9714A2C61F724A8A00E0C9C5 /* GameViewController.swift */; };
 		A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A06F1B4BC22400129605 /* DJIRootViewController.m */; };
 		A402A0741B4BC43800129605 /* DJIMapController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0721B4BC43800129605 /* DJIMapController.m */; };
 		A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0771B4BDAE400129605 /* DJIAircraftAnnotation.m */; };
@@ -28,6 +32,10 @@
 /* Begin PBXFileReference section */
 		0203E5861C9C0B5F00A69BCF /* DroneItOut-pch.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DroneItOut-pch.pch"; sourceTree = "<group>"; };
 		2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DroneItOut.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9714A2C21F724A7300E0C9C5 /* droneimages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = droneimages; sourceTree = "<group>"; };
+		9714A2C41F724A8A00E0C9C5 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
+		9714A2C51F724A8A00E0C9C5 /* GameScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
+		9714A2C61F724A8A00E0C9C5 /* GameViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
 		A402A06E1B4BC22400129605 /* DJIRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIRootViewController.h; sourceTree = "<group>"; };
 		A402A06F1B4BC22400129605 /* DJIRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DJIRootViewController.m; sourceTree = "<group>"; };
 		A402A0711B4BC43800129605 /* DJIMapController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIMapController.h; sourceTree = "<group>"; };
@@ -82,6 +90,17 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		9714A2C11F724A4D00E0C9C5 /* VoiceSimulator */ = {
+			isa = PBXGroup;
+			children = (
+				9714A2C21F724A7300E0C9C5 /* droneimages */,
+				9714A2C41F724A8A00E0C9C5 /* GameScene.sks */,
+				9714A2C51F724A8A00E0C9C5 /* GameScene.swift */,
+				9714A2C61F724A8A00E0C9C5 /* GameViewController.swift */,
+			);
+			name = VoiceSimulator;
+			sourceTree = "<group>";
+		};
 		A4507F2D1CB506F20037861C /* DemoUtility */ = {
 			isa = PBXGroup;
 			children = (
@@ -113,6 +132,7 @@
 		A4E86B741B4A374300F204DA /* DroneItOut */ = {
 			isa = PBXGroup;
 			children = (
+				9714A2C11F724A4D00E0C9C5 /* VoiceSimulator */,
 				A44305471DA88CF3009C1370 /* DroneItOut.entitlements */,
 				A402A06E1B4BC22400129605 /* DJIRootViewController.h */,
 				A402A06F1B4BC22400129605 /* DJIRootViewController.m */,
@@ -211,6 +231,7 @@
 					A4E86B711B4A374300F204DA = {
 						CreatedOnToolsVersion = 6.3;
 						DevelopmentTeam = 6WA6Y7KBQJ;
+						LastSwiftMigration = 0830;
 						SystemCapabilities = {
 							com.apple.DataProtection = {
 								enabled = 1;
@@ -246,6 +267,8 @@
 				A4507F2C1CB506D40037861C /* DJIWaypointConfigViewController.xib in Resources */,
 				A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */,
 				A4507F2A1CB506D40037861C /* DJIGSButtonViewController.xib in Resources */,
+				9714A2C71F724A8A00E0C9C5 /* GameScene.sks in Resources */,
+				9714A2C31F724A7300E0C9C5 /* droneimages in Resources */,
 				A4E86B831B4A374300F204DA /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -311,6 +334,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9714A2C81F724A8A00E0C9C5 /* GameScene.swift in Sources */,
 				A4507F301CB506F20037861C /* DemoUtility.m in Sources */,
 				A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */,
 				A4507F2B1CB506D40037861C /* DJIWaypointConfigViewController.m in Sources */,
@@ -319,6 +343,7 @@
 				A402A0741B4BC43800129605 /* DJIMapController.m in Sources */,
 				A402A07B1B4BDAE400129605 /* DJIAircraftAnnotationView.m in Sources */,
 				A4E86B7B1B4A374300F204DA /* AppDelegate.m in Sources */,
+				9714A2C91F724A8A00E0C9C5 /* GameViewController.swift in Sources */,
 				A4E86B781B4A374300F204DA /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -432,6 +457,7 @@
 			baseConfigurationReference = C3AA6A2351ECED8D8DB1AF13 /* Pods-DroneItOut.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = DroneItOut/DroneItOut.entitlements;
 				DEVELOPMENT_TEAM = 6WA6Y7KBQJ;
 				ENABLE_BITCODE = NO;
@@ -443,6 +469,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.dji.DroneItOut;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -451,6 +479,7 @@
 			baseConfigurationReference = ECE9648897BB0F0EFB3445E7 /* Pods-DroneItOut.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = DroneItOut/DroneItOut.entitlements;
 				DEVELOPMENT_TEAM = 6WA6Y7KBQJ;
 				ENABLE_BITCODE = NO;
@@ -462,6 +491,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.dji.DroneItOut;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

@@ -2,4 +2,5 @@
 
 target 'DroneItOut' do
   pod 'DJI-SDK-iOS', '~> 4.2.2’
+  pod ‘SpeechKit’
 end
