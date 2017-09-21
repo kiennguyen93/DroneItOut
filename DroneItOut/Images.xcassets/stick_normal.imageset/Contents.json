@@ -2,11 +2,11 @@
   "images" : [
     {
       "idiom" : "universal",
+      "filename" : "stick_normal.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "aircraft@2x.png",
       "scale" : "2x"
     },
     {

@@ -17,7 +17,7 @@
 
 #define ENTER_DEBUG_MODE 0
 
-@interface DJIRootViewController ()<DJIGSButtonViewControllerDelegate, DJIWaypointConfigViewControllerDelegate, MKMapViewDelegate, CLLocationManagerDelegate, DJISDKManagerDelegate, DJIFlightControllerDelegate>
+@interface DJIRootViewController ()<DJIGSButtonViewControllerDelegate, DJIWaypointConfigViewControllerDelegate, MKMapViewDelegate, CLLocationManagerDelegate, DJISDKManagerDelegate, DJIFlightControllerDelegate,UITableViewDelegate>
 
 @property (nonatomic, assign) BOOL isEditingPoints;
 @property (nonatomic, strong) DJIGSButtonViewController *gsButtonVC;
@@ -36,6 +36,13 @@
 @property(nonatomic, strong) IBOutlet UILabel* hsLabel;
 @property(nonatomic, strong) IBOutlet UILabel* vsLabel;
 @property(nonatomic, strong) IBOutlet UILabel* altitudeLabel;
+
+
+@property (weak, nonatomic) IBOutlet UIButton *btnOutlet;
+@property (weak, nonatomic) IBOutlet UITableView *tableView;
+
+@property(strong, nonatomic) NSArray *data;
+
 
 @property(nonatomic, strong) DJIMutableWaypointMission* waypointMission;
 @end
@@ -56,6 +63,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.data = [[NSArray alloc]initWithObjects:@"VoiceSimulator", @"Voice Commands", @"Follow Me", nil];
+    self.tableView.delegate = self;
+    self.tableView.dataSource = self;
+    self.tableView.hidden = YES;
 
     [self registerApp];
     
@@ -63,10 +74,36 @@
     [self initData];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return [self.data count];
 }
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    static NSString *simpleTableIdentifier = @"Modes";
+    
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
+    if (cell == nil) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
+    }
+    cell.textLabel.text = [self.data objectAtIndex:indexPath.row];
+                return cell;
+                
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    [self.btnOutlet setTitle:cell.textLabel.text forState:UIControlStateNormal];
+}
+- (IBAction)btnAction:(id)sender{
+    if (self.tableView.hidden == YES) {
+        self.tableView.hidden = NO;
+    }
+    else
+        self.tableView.hidden = YES;
+}
+
 
 - (BOOL)prefersStatusBarHidden {
     return NO;

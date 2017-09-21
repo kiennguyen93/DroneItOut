@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		69CE51B131FF2EFF2E187B8E /* libPods-DroneItOut.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */; };
+		979F8FDF1F73982800FC0477 /* simulator in Resources */ = {isa = PBXBuildFile; fileRef = 979F8FDE1F73982800FC0477 /* simulator */; };
 		A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A06F1B4BC22400129605 /* DJIRootViewController.m */; };
 		A402A0741B4BC43800129605 /* DJIMapController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0721B4BC43800129605 /* DJIMapController.m */; };
 		A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0771B4BDAE400129605 /* DJIAircraftAnnotation.m */; };
@@ -28,6 +29,7 @@
 /* Begin PBXFileReference section */
 		0203E5861C9C0B5F00A69BCF /* DroneItOut-pch.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DroneItOut-pch.pch"; sourceTree = "<group>"; };
 		2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DroneItOut.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		979F8FDE1F73982800FC0477 /* simulator */ = {isa = PBXFileReference; lastKnownFileType = folder; path = simulator; sourceTree = "<group>"; };
 		A402A06E1B4BC22400129605 /* DJIRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIRootViewController.h; sourceTree = "<group>"; };
 		A402A06F1B4BC22400129605 /* DJIRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DJIRootViewController.m; sourceTree = "<group>"; };
 		A402A0711B4BC43800129605 /* DJIMapController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIMapController.h; sourceTree = "<group>"; };
@@ -113,6 +115,7 @@
 		A4E86B741B4A374300F204DA /* DroneItOut */ = {
 			isa = PBXGroup;
 			children = (
+				979F8FDE1F73982800FC0477 /* simulator */,
 				A44305471DA88CF3009C1370 /* DroneItOut.entitlements */,
 				A402A06E1B4BC22400129605 /* DJIRootViewController.h */,
 				A402A06F1B4BC22400129605 /* DJIRootViewController.m */,
@@ -243,6 +246,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A4E86B811B4A374300F204DA /* Main.storyboard in Resources */,
+				979F8FDF1F73982800FC0477 /* simulator in Resources */,
 				A4507F2C1CB506D40037861C /* DJIWaypointConfigViewController.xib in Resources */,
 				A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */,
 				A4507F2A1CB506D40037861C /* DJIGSButtonViewController.xib in Resources */,
