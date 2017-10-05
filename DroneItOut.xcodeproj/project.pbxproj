@@ -24,6 +24,7 @@
 		A4E86B831B4A374300F204DA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A4E86B821B4A374300F204DA /* Images.xcassets */; };
 		A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A4E86B841B4A374300F204DA /* LaunchScreen.xib */; };
 		A4F9574C1B4ADD570017733D /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4F9574B1B4ADD570017733D /* MapKit.framework */; };
+		EF3A417A1F7D513A005958D3 /* FollowMeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EF3A41791F7D513A005958D3 /* FollowMeViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +61,8 @@
 		A4F9574B1B4ADD570017733D /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		C3AA6A2351ECED8D8DB1AF13 /* Pods-DroneItOut.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DroneItOut.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DroneItOut/Pods-DroneItOut.debug.xcconfig"; sourceTree = "<group>"; };
 		ECE9648897BB0F0EFB3445E7 /* Pods-DroneItOut.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DroneItOut.release.xcconfig"; path = "Pods/Target Support Files/Pods-DroneItOut/Pods-DroneItOut.release.xcconfig"; sourceTree = "<group>"; };
+		EF3A41791F7D513A005958D3 /* FollowMeViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FollowMeViewController.m; sourceTree = "<group>"; };
+		EF3A417B1F7D51C3005958D3 /* FollowMeViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FollowMeViewController.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +122,8 @@
 				A44305471DA88CF3009C1370 /* DroneItOut.entitlements */,
 				A402A06E1B4BC22400129605 /* DJIRootViewController.h */,
 				A402A06F1B4BC22400129605 /* DJIRootViewController.m */,
+				EF3A417B1F7D51C3005958D3 /* FollowMeViewController.h */,
+				EF3A41791F7D513A005958D3 /* FollowMeViewController.m */,
 				A4E86B791B4A374300F204DA /* AppDelegate.h */,
 				A4E86B7A1B4A374300F204DA /* AppDelegate.m */,
 				A402A0761B4BDAE400129605 /* DJIAircraftAnnotation.h */,
@@ -316,6 +321,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A4507F301CB506F20037861C /* DemoUtility.m in Sources */,
+				EF3A417A1F7D513A005958D3 /* FollowMeViewController.m in Sources */,
 				A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */,
 				A4507F2B1CB506D40037861C /* DJIWaypointConfigViewController.m in Sources */,
 				A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */,

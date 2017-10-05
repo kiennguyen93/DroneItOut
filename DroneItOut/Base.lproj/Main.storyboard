@@ -1,14 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="landscape">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--Follow Me View Controller-->
+        <scene sceneID="eKa-nG-FvC">
+            <objects>
+                <viewController id="bz9-sH-LbI" customClass="FollowMeViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="jb3-K8-loA"/>
+                        <viewControllerLayoutGuide type="bottom" id="qWk-ch-JdZ"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="HAx-l0-9by">
+                        <rect key="frame" x="0.0" y="0.0" width="667" height="375"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9rB-iU-Ms2">
+                                <rect key="frame" x="10" y="10" width="44" height="36"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <state key="normal" title="Back"/>
+                                <connections>
+                                    <action selector="loadRootView:" destination="bz9-sH-LbI" eventType="touchUpInside" id="TPz-VE-ahP"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6jm-3F-Aaq">
+                                <rect key="frame" x="165" y="137" width="120" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <state key="normal" title="Raise Altitude"/>
+                                <connections>
+                                    <action selector="raiseAltitude:" destination="bz9-sH-LbI" eventType="touchUpInside" id="qJd-86-iJO"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="9rB-iU-Ms2" firstAttribute="top" secondItem="jb3-K8-loA" secondAttribute="bottom" constant="10" id="KRD-s7-tZF"/>
+                            <constraint firstItem="9rB-iU-Ms2" firstAttribute="leading" secondItem="HAx-l0-9by" secondAttribute="leading" constant="10" id="Shb-MG-DNV"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="presentation" identifier="FollowMeToRootViewSegue" id="7DX-9H-pLt"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9G0-f6-TJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-590.55472263868069" y="-1418.4000000000001"/>
+        </scene>
         <!--Root View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
@@ -66,7 +110,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="Alt:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ID1-by-XJD">
-                                        <rect key="frame" x="519.5" y="36" width="20.5" height="21"/>
+                                        <rect key="frame" x="521.5" y="36" width="20.5" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <nil key="highlightedColor"/>
@@ -100,7 +144,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gf1-2w-0eg">
-                                        <rect key="frame" x="597" y="31" width="62" height="30"/>
+                                        <rect key="frame" x="599" y="31" width="60" height="30"/>
                                         <color key="backgroundColor" red="0.88094356592730183" green="1" blue="0.66123264450655117" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                         <state key="normal" title="Modes"/>
@@ -146,6 +190,7 @@
                             <constraint firstAttribute="trailing" secondItem="gkc-2y-dBR" secondAttribute="trailing" id="etJ-aB-OlV"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="Q1F-Bd-nSw"/>
                     <connections>
                         <outlet property="altitudeLabel" destination="XlO-A1-74V" id="TDA-yZ-A3I"/>
                         <outlet property="btnOutlet" destination="Gf1-2w-0eg" id="P1O-q3-fjR"/>
@@ -157,6 +202,7 @@
                         <outlet property="topBarView" destination="tdE-bu-rKa" id="5Lf-oc-iWx"/>
                         <outlet property="view" destination="8bC-Xf-vdC" id="3Be-UJ-oj8"/>
                         <outlet property="vsLabel" destination="dNl-C9-FhW" id="orv-FH-3a7"/>
+                        <segue destination="bz9-sH-LbI" kind="presentation" identifier="FollowMeSegue" id="RL2-yZ-Gf0"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>

@@ -3,7 +3,7 @@
 //  DroneItOut
 //
 //  Created by Kien Nguyen on 9/6/2017.
-//  Copyright (c) 2017 Kien Nguyen. All rights reserved.
+//  Copyright (c) 2017 Kien Nguyen & Eric Hernandez-Lu. All rights reserved.
 //
 
 #import "DJIRootViewController.h"
@@ -95,6 +95,11 @@
     
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     [self.btnOutlet setTitle:cell.textLabel.text forState:UIControlStateNormal];
+    
+    if([cell.textLabel.text isEqualToString:@"Follow Me"])
+    {
+        [self performSegueWithIdentifier:@"FollowMeSegue" sender:self];
+    }
 }
 - (IBAction)btnAction:(id)sender{
     if (self.tableView.hidden == YES) {
