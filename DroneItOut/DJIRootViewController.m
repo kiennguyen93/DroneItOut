@@ -100,6 +100,10 @@
     {
         [self performSegueWithIdentifier:@"FollowMeSegue" sender:self];
     }
+    else if([cell.textLabel.text isEqualToString:@"Voice Commands"])
+    {
+        [self performSegueWithIdentifier:@"VoiceSegue" sender:self];
+    }
 }
 - (IBAction)btnAction:(id)sender{
     if (self.tableView.hidden == YES) {
