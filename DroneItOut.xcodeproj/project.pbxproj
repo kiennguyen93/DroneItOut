@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		69CE51B131FF2EFF2E187B8E /* libPods-DroneItOut.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */; };
+		976B61881F8C581B00CFDCD9 /* DJIBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */; };
+		976B618A1F8C58F800CFDCD9 /* DJICustomMission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */; };
 		979F8FDF1F73982800FC0477 /* simulator in Resources */ = {isa = PBXBuildFile; fileRef = 979F8FDE1F73982800FC0477 /* simulator */; };
 		A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A06F1B4BC22400129605 /* DJIRootViewController.m */; };
 		A402A0741B4BC43800129605 /* DJIMapController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0721B4BC43800129605 /* DJIMapController.m */; };
@@ -31,6 +33,8 @@
 /* Begin PBXFileReference section */
 		0203E5861C9C0B5F00A69BCF /* DroneItOut-pch.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DroneItOut-pch.pch"; sourceTree = "<group>"; };
 		2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DroneItOut.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJIBaseViewController.swift; sourceTree = "<group>"; };
+		976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJICustomMission.swift; sourceTree = "<group>"; };
 		979F8FDE1F73982800FC0477 /* simulator */ = {isa = PBXFileReference; lastKnownFileType = folder; path = simulator; sourceTree = "<group>"; };
 		A402A06E1B4BC22400129605 /* DJIRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIRootViewController.h; sourceTree = "<group>"; };
 		A402A06F1B4BC22400129605 /* DJIRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DJIRootViewController.m; sourceTree = "<group>"; };
@@ -90,6 +94,16 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
+		976B61861F8C578900CFDCD9 /* VoiceCommands */ = {
+			isa = PBXGroup;
+			children = (
+				EF27F7001F8C0DEF00DA83B7 /* VoiceViewController.swift */,
+				976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */,
+				976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */,
+			);
+			path = VoiceCommands;
+			sourceTree = "<group>";
+		};
 		A4507F2D1CB506F20037861C /* DemoUtility */ = {
 			isa = PBXGroup;
 			children = (
@@ -142,7 +156,7 @@
 				A4507F271CB506D40037861C /* DJIWaypointConfigViewController.m */,
 				A4507F281CB506D40037861C /* DJIWaypointConfigViewController.xib */,
 				A4E86B7F1B4A374300F204DA /* Main.storyboard */,
-				EF27F7001F8C0DEF00DA83B7 /* VoiceViewController.swift */,
+				976B61861F8C578900CFDCD9 /* VoiceCommands */,
 				A4E86B821B4A374300F204DA /* Images.xcassets */,
 				A4E86B841B4A374300F204DA /* LaunchScreen.xib */,
 				A4507F2D1CB506F20037861C /* DemoUtility */,
@@ -316,7 +330,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -332,7 +346,9 @@
 				A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */,
 				A4507F2B1CB506D40037861C /* DJIWaypointConfigViewController.m in Sources */,
 				A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */,
+				976B618A1F8C58F800CFDCD9 /* DJICustomMission.swift in Sources */,
 				A4507F291CB506D40037861C /* DJIGSButtonViewController.m in Sources */,
+				976B61881F8C581B00CFDCD9 /* DJIBaseViewController.swift in Sources */,
 				A402A0741B4BC43800129605 /* DJIMapController.m in Sources */,
 				A402A07B1B4BDAE400129605 /* DJIAircraftAnnotationView.m in Sources */,
 				A4E86B7B1B4A374300F204DA /* AppDelegate.m in Sources */,
