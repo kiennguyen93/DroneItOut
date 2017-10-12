@@ -30,13 +30,22 @@
                                     <action selector="loadRootView:" destination="bz9-sH-LbI" eventType="touchUpInside" id="TPz-VE-ahP"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="6jm-3F-Aaq">
-                                <rect key="frame" x="165" y="137" width="120" height="30"/>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HaH-j5-2TG">
+                                <rect key="frame" x="203" y="55" width="89" height="36"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                <state key="normal" title="Raise Altitude"/>
+                                <state key="normal" title="Start"/>
                                 <connections>
-                                    <action selector="raiseAltitude:" destination="bz9-sH-LbI" eventType="touchUpInside" id="qJd-86-iJO"/>
+                                    <action selector="startFollowMe:" destination="bz9-sH-LbI" eventType="touchUpInside" id="Zqr-mr-JxM"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uTi-75-qJV">
+                                <rect key="frame" x="338" y="96" width="94" height="36"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <state key="normal" title="Stop"/>
+                                <connections>
+                                    <action selector="stopFollowMe:" destination="bz9-sH-LbI" eventType="touchUpInside" id="7h5-o2-qN1"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -52,7 +61,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9G0-f6-TJc" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-556" y="-1461"/>
+            <point key="canvasLocation" x="-556.69014084507046" y="-1462.5"/>
         </scene>
         <!--Root View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -73,7 +82,7 @@
                                 </connections>
                             </mapView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tdE-bu-rKa" userLabel="top bar">
-                                <rect key="frame" x="0.0" y="0.0" width="560" height="72"/>
+                                <rect key="frame" x="0.0" y="0.0" width="568" height="72"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Mode:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jZg-x9-i4y">
                                         <rect key="frame" x="8" y="36" width="42" height="21"/>
@@ -157,7 +166,7 @@
                                 </constraints>
                             </view>
                             <tableView opaque="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Sk0-YN-lhE">
-                                <rect key="frame" x="392" y="118" width="168" height="140"/>
+                                <rect key="frame" x="400" y="118" width="168" height="140"/>
                                 <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                 <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
@@ -166,7 +175,7 @@
                                 <sections/>
                             </tableView>
                             <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Gf1-2w-0eg">
-                                <rect key="frame" x="500" y="89" width="60" height="30"/>
+                                <rect key="frame" x="508" y="89" width="60" height="30"/>
                                 <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                 <color key="tintColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

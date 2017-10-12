@@ -72,8 +72,34 @@
     [self performSegueWithIdentifier:@"FollowMeToRootViewSegue" sender:self];
 }
 
-- (IBAction)raiseAltitude:(UIButton *)sender
+- (IBAction)startFollowMe:(UIButton *)sender
 {
+    WeakRef(target);
+    DJIFollowMeMission* mission = (DJIFollowMeMission*)[self initializeMission];
+    [self.followMeOperator startMission:mission withCompletion:^(NSError * _Nullable error) {
+        if (error) {
+            ShowMessage(@"", @"Start Mission Failed:%@", error, @"OK");
+        } else {
+            [target missionDidStart:error];
+        }
+    }];
+    
+    [self.followMeOperator addListenerToEvents:self withQueue:nil andBlock:^(DJIFollowMeMissionEvent * _Nonnull event) {
+        [target onReciviedFollowMeEvent:event];
+    }];
+}
+
+- (IBAction)stopFollowMe:(UIButton *)sender
+{
+    WeakRef(target);
+    [self.followMeOperator stopMissionWithCompletion:^(NSError * _Nullable error) {
+        if (error) {
+            ShowMessage(@"", @"Stop Mission Failed:%@", error.description, @"OK");
+        } else {
+            [target startUpdateTimer];
+            [target.followMeOperator removeListener:self];
+        }
+    }];
 }
 
 #pragma mark CLLocation Methods
