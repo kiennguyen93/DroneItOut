@@ -222,6 +222,13 @@
     self.prevTarget = self.droneLocation;
     self.target1 = self.droneLocation;
     CLLocationManager *locationManager2 = [[CLLocationManager alloc] init];
+    if ([CLLocationManager locationServicesEnabled])
+    {
+        locationManager2.delegate = self;
+        locationManager2.desiredAccuracy = kCLLocationAccuracyBest;
+        locationManager2.distanceFilter = kCLDistanceFilterNone;
+        [locationManager2 startUpdatingLocation];
+    }
     CLLocation *location = [locationManager2 location];
     CLLocationCoordinate2D phoneCoordinate = [location coordinate];
     self.target2 = phoneCoordinate;
