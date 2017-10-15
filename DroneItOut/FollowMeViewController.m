@@ -221,7 +221,10 @@
     
     self.prevTarget = self.droneLocation;
     self.target1 = self.droneLocation;
-    self.target2 = CLLocationCoordinate2DMake(self.target1.latitude + RUNNING_DISTANCE_IN_METER *ONE_METER_OFFSET, self.target1.longitude);
+    CLLocationManager *locationManager2 = [[CLLocationManager alloc] init];
+    CLLocation *location = [locationManager2 location];
+    CLLocationCoordinate2D phoneCoordinate = [location coordinate];
+    self.target2 = phoneCoordinate;
     self.currentTarget = self.target2;
     
     [self startUpdateTimer];
