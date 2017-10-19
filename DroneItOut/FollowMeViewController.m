@@ -83,6 +83,20 @@
             [target missionDidStart:error];
         }
     }];
+    CLLocationManager *locationManager2 = [[CLLocationManager alloc] init];
+    if ([CLLocationManager locationServicesEnabled])
+    {
+        locationManager2.delegate = self;
+        locationManager2.desiredAccuracy = kCLLocationAccuracyBest;
+        locationManager2.distanceFilter = kCLDistanceFilterNone;
+        [locationManager2 startUpdatingLocation];
+    }
+    CLLocation *location = [locationManager2 location];
+    CLLocationCoordinate2D phoneCoordinate = [location coordinate];
+    self.target2 = phoneCoordinate;
+    self.currentTarget = self.target2;
+    
+    [self startUpdateTimer];
     
     [self.followMeOperator addListenerToEvents:self withQueue:nil andBlock:^(DJIFollowMeMissionEvent * _Nonnull event) {
         [target onReciviedFollowMeEvent:event];
@@ -165,8 +179,19 @@
         offset = 0.1 * ONE_METER_OFFSET;
     }
     
-    CLLocationCoordinate2D target = CLLocationCoordinate2DMake(self.prevTarget.latitude + offset, self.prevTarget.longitude);
-    [self.followMeOperator updateFollowMeCoordinate:target];
+    CLLocationManager *locationManager2 = [[CLLocationManager alloc] init];
+    if ([CLLocationManager locationServicesEnabled])
+    {
+        locationManager2.delegate = self;
+        locationManager2.desiredAccuracy = kCLLocationAccuracyBest;
+        locationManager2.distanceFilter = kCLDistanceFilterNone;
+        [locationManager2 startUpdatingLocation];
+    }
+    CLLocation *location = [locationManager2 location];
+    CLLocationCoordinate2D phoneCoordinate = [location coordinate];
+    self.target2 = phoneCoordinate;
+    self.currentTarget = self.target2;
+    [self.followMeOperator updateFollowMeCoordinate:self.currentTarget];
     
     self.prevTarget = target;
     
