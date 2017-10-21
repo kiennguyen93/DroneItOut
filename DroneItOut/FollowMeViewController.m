@@ -16,7 +16,7 @@
 #define RUNNING_DISTANCE_IN_METER   (10)
 #define ONE_METER_OFFSET            (0.00000901315)
 
-@interface FollowMeViewController ()<CLLocationManagerDelegate>
+@interface FollowMeViewController ()
 
 @property(nonatomic, strong) CLLocationManager* locationManager;
 @property(nonatomic, assign) CLLocationCoordinate2D userLocation;
@@ -26,6 +26,7 @@
 @property (nonatomic) CLLocationCoordinate2D target1;
 @property (nonatomic) CLLocationCoordinate2D target2;
 @property (nonatomic) CLLocationCoordinate2D prevTarget;
+@property (nonatomic) CLLocationCoordinate2D aircraftLocation;
 
 @property (nonatomic, strong) NSTimer* updateTimer;
 @property (nonatomic) BOOL isGoingToNorth; //Check if target is moving north
@@ -35,33 +36,40 @@
 @end
 
 @implementation FollowMeViewController
-@synthesize droneLocation = _aircraftLocation; //Letting "droneLocation" replace "aircraftLocation"?? Not sure if it will work.
+@synthesize aircraftLocation = _aircraftLocation; //Letting "droneLocation" replace "aircraftLocation"?? Not sure if it will work.
 
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    [self startUpdateLocation];
+    self.followMeOperator = [[DJISDKManager missionControl] followMeMissionOperator];
 }
 
-- (void)viewWillDisappear:(BOOL)animated
-{
-    [super viewWillDisappear:animated];
-    [self.locationManager stopUpdatingLocation];
+-(void)flightController:(DJIFlightController *)fc didUpdateState:(DJIFlightControllerState *)state {
+    self.aircraftLocation = state.aircraftLocation.coordinate;
 }
-
--(void)setAircraftLocation:(CLLocationCoordinate2D)droneLocation {
-    _aircraftLocation = droneLocation;
+-(void)setAircraftLocation:(CLLocationCoordinate2D)aircraftLocation {
+    //aircraftLocation = state.aircraftLocation.coordinate;
     //   self.prepareButton.enabled = NO;
     //   self.pauseButton.enabled = NO;
-    //   self.resumeButton.enabled = NO;
+    //   self.resumeButton.enabled = NsO;
     //   self.downloadButton.enabled = NO;
     // ^Add in these buttons later...
 }
 
 -(DJIMission*) initializeMission {
     DJIFollowMeMission* mission = [[DJIFollowMeMission alloc] init];
-    mission.followMeCoordinate = self.droneLocation;
+    CLLocationManager *locationManager2 = [[CLLocationManager alloc] init];
+    if ([CLLocationManager locationServicesEnabled])
+    {
+        locationManager2.delegate = self;
+        locationManager2.desiredAccuracy = kCLLocationAccuracyBest;
+        locationManager2.distanceFilter = kCLDistanceFilterNone;
+        [locationManager2 startUpdatingLocation];
+    }
+    CLLocation *location = [locationManager2 location];
+    CLLocationCoordinate2D phoneCoordinate = [location coordinate];
+    mission.followMeCoordinate = phoneCoordinate;
     mission.heading = DJIFollowMeHeadingTowardFollowPosition;
     
     return mission;
@@ -191,11 +199,11 @@
     CLLocationCoordinate2D phoneCoordinate = [location coordinate];
     self.target2 = phoneCoordinate;
     self.currentTarget = self.target2;
-    [self.followMeOperator updateFollowMeCoordinate:self.currentTarget];
+    [self.followMeOperator updateFollowMeCoordinate:phoneCoordinate];
     
-    self.prevTarget = target;
+    //self.prevTarget = target;
     
-    [self changeDirectionIfFarEnough];
+    //[self changeDirectionIfFarEnough];
 }
 
 -(void) changeDirectionIfFarEnough {
