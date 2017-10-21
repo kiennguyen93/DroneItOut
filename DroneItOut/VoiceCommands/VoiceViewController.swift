@@ -73,7 +73,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     var waypointList: [DJIWaypoint] = []
     
     var waypointMission: DJIWaypointMission = DJIMutableWaypointMission()
-    let mission = DJIMutableWaypointMission()
+    var mission = DJIMutableWaypointMission()
     
     var customMission: DJICustomMission? = nil
     var missionSetup: Bool = false
@@ -242,7 +242,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     // *************This is where the action happens after speech has been reconized!*********** //
     func transaction(_ transaction: SKTransaction!, didReceive recognition: SKRecognition!) {
-        
+
         state = .sksIdle
         stateText.text = "Idle"
         //convert all text to lowercase
@@ -281,6 +281,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         commands = findMovementCommands(str: words)
         if !commands.isEmpty {
             regexCommandText.text = "\(commands)"
+            //runMovementCommands()
             commands = [] //reset commands array after it's done
             orderText.text = "2"
         }
@@ -294,19 +295,40 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             commands = [] //reset commands array after it's done
             orderText.text = "3"
         }
-        
+ 
         // if none of those regex are matched, it will go to a String
         var strArr = words.characters.split{$0 == " "}.map(String.init)
-        print("strARR = \(strArr) ")
+        
         if strArr.count > 1 {
             
-            if (strArr[0] == "power" && strArr[1] == "on") || strArr[0] == "on" {
+           
+            //take off
+            if strArr[0] == "take" && strArr[1] == "off" {
+                takeOff(fc)
+            }
+                /*
+            else if strArr[0] == "go" && strArr[1] == "up" {
+                runShortMovementCommands(direction: strArr[1])
+            }
+            else if strArr[0] == "go" && strArr[1] == "down" {
+                runShortMovementCommands(direction: strArr[1])
+            }
+            else if strArr[0] == "go" && strArr[1] == "left" {
+                runShortMovementCommands(direction: strArr[1])
+            }
+            else if strArr[0] == "go" && strArr[1] == "right" {
+                runShortMovementCommands(direction: strArr[1])
+            }
+            else if strArr[0] == "go" && strArr[1] == "backward" {
+                runShortMovementCommands(direction: strArr[1])
+            }
+            else if strArr[0] == "go" && strArr[1] == "forward" {
+                runShortMovementCommands(direction: strArr[1])
+            }
+ */
+            else if (strArr[0] == "power" && strArr[1] == "on") || strArr[0] == "on" {
                 self.showAlertResult(info: "Power on function is not existed. Please say your next command !")
                 // startPropellers(fc)
-            }
-            //take off
-            else if strArr[0] == "take" && strArr[1] == "off" {
-                takeOff(fc)
             }
             //say "power off" to off propellers
             //to ensure safety, this function will use auto land fuction to land the aircraft before turn off propellers
@@ -321,6 +343,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 showAlertResult(info: "This command is not in the system, please say your next command !")
                 strArr.removeAll()
             }
+
         }
         
         //loop through all words
@@ -330,8 +353,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             if str == "land" {
                 land(fc)
             }
-            //limit height and radius within 20m
-            if str == "limit" {
+            //set boudary limit height and radius within 20m
+             if str == "limit" {
                 enableMaxFlightRadius(fc)
             }
             //say "enable" to enable virtual stick mode
@@ -339,29 +362,31 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 enableVirtualStickModeSaid()
             }
             //say "disable" to disable virtual stick mode
-            if str == "disable" {
+             if str == "disable" {
                 disableVirtualStickModeSaid()
             }
             //say "execute" to executeMission
-            if str == "execute" {
+             if str == "execute" {
                 executeMission()
             }
             
             // say "cancel" to cancel mission
-            if str == "cancel" {
+             if str == "cancel" {
                 cancelMissionSaid()
                 VSMText.text = "Mission cancelled"
             }
             // say "stop" to stop mission
-            if str == "stop" {
+             if str == "stop" {
                 pauseMissionSaid()
                 VSMText.text = "Mission paused"
             }
             // say "resume" to resume mission
-            if str == "resume" {
+             if str == "resume" {
                 resumeMissionSaid()
                 VSMText.text = "Mission resume"
             }
+          
+
             
         }
     }
@@ -370,14 +395,14 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     //use only for new compass commands
     func findNSEWCommands( str: String ) -> [String] {
-        let commandRegex = "\\s*(go)\\s(north|south|east|west)\\s?((?:\\d*\\.)?\\d+)?\\s(feet|foot|meters|meter|m|ft)?"
+        let commandRegex = "\\s*(go)\\s(north|south|east|west)?\\s?((?:\\d*\\.)?\\d+)?\\s(feet|foot|meters|meter|m|ft)?"
         let matched = matches(for: commandRegex,in: str )
         print(matched)
         return matched
     }
     //use for getting direction, distance, and units of measurements
     func findMovementCommands( str: String ) -> [String] {
-        let commandRegex = "\\s*(go)\\s(left|right|up|down|forward|backward)\\s?((?:\\d*\\.)?\\d+)?\\s(feet|foot|meters|meter|m|ft)"
+        let commandRegex = "\\s*(go)\\s(left|right|up|down|forward|backward)?\\s?((?:\\d*\\.)?\\d+)?\\s(feet|foot|meters|meter|m|ft)"
         let matched = matches(for: commandRegex,in: str )
         print(matched)
         return matched
@@ -391,7 +416,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     // matching function
     //use regex to extract matches from string and retrun array of strings
-    func matches(for regex: String!, in text: String!) -> [String] {
+    func matches(for regex: String, in text: String) -> [String] {
         do {
             let regex = try NSRegularExpression(pattern: regex)
             let nsString = text as NSString
@@ -403,6 +428,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             return []
         }
     }
+    
     //******** RUN COMMANDS METHODS **********//
     func runShortMovementCommands() {
         var direction: String = ""
@@ -412,27 +438,21 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 var commandArr = comm.characters.split{$0 == " "}.map(String.init)
                 commandText.text = "\(commandArr[0])"
                 directionText.text = "\(commandArr[1])"
-                /*
-                 if commandArr.count == 0 {
-                 commandText.text = " "
-                 directionText.text = " "
-                 }
-                 else {
-                 commandText.text = "\(commandArr[0])"
-                 directionText.text = "\(commandArr[1])"
-                 }
-                 */
-                if commands.count == 3 { //Drone goes left
-                    direction = commandArr[2]
-                }
-                if commands.count == 2 { //Go up
+
+                
+                
+                if commandArr.count == 2 { //Go up
                     direction = commandArr[1]
                     distanceText.text = "\(direction)"
                 }
+                /*
+                 if commandArr.count == 3 { //Drone goes left
+                 direction = commandArr[2]
+                 }
+                 */
                 //initalize a data object. They have pitch, roll, yaw, and throttle
                 var commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
                 //flightCtrlData?.pitch = 0.5 - make it goes to the right a little bit 0.5m/s
-                
                 //Here is where data gets changed
                 commandCtrlData?.pitch = 0
                 commandCtrlData?.roll = 0
@@ -493,7 +513,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                     self.fc?.yawControlMode = DJIVirtualStickYawControlMode.angularVelocity
                     self.fc?.rollPitchControlMode = DJIVirtualStickRollPitchControlMode.velocity
                     self.fc?.verticalControlMode = DJIVirtualStickVerticalControlMode.velocity
-                    self.fc?.rollPitchCoordinateSystem = DJIVirtualStickFlightCoordinateSystem.body
+                    
+                    //DJIVirtualStickFlightCoordinateSystem.body doesn't work anymore 
+                    self.fc?.rollPitchCoordinateSystem = DJIVirtualStickFlightCoordinateSystem.ground
+                    //self.fc?.rollPitchCoordinateSystem = DJIVirtualStickFlightCoordinateSystem.body
                     
                     var flightCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
                     
@@ -644,7 +667,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 mission.finishedAction = DJIWaypointMissionFinishedAction.noAction
                
                 //prepare mission
-                prepareMission(missionName: self.waypointMission)
+                prepareMission(missionName: self.mission)
             }
         }
     }
@@ -737,7 +760,28 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     func prepareMission(missionName: DJIWaypointMission){
         print("Mission prepared!")
-        executeMission()
+        //executeMission()
+        // Upload the mission and then execute it
+        // Setting up the mission manager
+        /*
+        mission = DJIWaypointMission
+        self.mission.(mission, withProgress: nil, withCompletion:
+            {[weak self] (error: NSError?) -> Void in
+                if error == nil {
+                    self?.missionManager!.startMissionExecutionWithCompletion({ [weak self] (error: NSError?) -> Void in
+                        if error != nil {
+                            print("Error starting mission" + "abcd")
+                            self!.logDebug("Error starting mission: " + (error?.description)!)
+                            
+                        }
+                    })
+                } else {
+                    print("Error preparing mission")
+                    self!.logDebug("Error preparing mission: " + (error?.description)!)
+                }
+                
+        })
+ */
     }
     
     //************ Flight Controller Drone Method *****************//
