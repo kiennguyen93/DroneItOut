@@ -58,7 +58,7 @@
     // ^Add in these buttons later...
 }
 
--(DJIMission*) initializeMission {
+-(DJIFollowMeMission*) initializeMission {
     DJIFollowMeMission* mission = [[DJIFollowMeMission alloc] init];
     CLLocationManager *locationManager2 = [[CLLocationManager alloc] init];
     if ([CLLocationManager locationServicesEnabled])
@@ -82,13 +82,30 @@
     [self performSegueWithIdentifier:@"FollowMeToRootViewSegue" sender:self];
 }
 
+-(NSString *)descriptionForState:(DJIFollowMeMissionState)state {
+    switch (state) {
+        case DJIFollowMeMissionStateUnknown:
+            return @"Unknown";
+        case DJIFollowMeMissionStateExecuting:
+            return @"Executing";
+        case DJIFollowMeMissionStateRecovering:
+            return @"Recovering";
+        case DJIFollowMeMissionStateDisconnected:
+            return @"Disconnected";
+        case DJIFollowMeMissionStateNotSupported:
+            return @"NotSupported";
+        case DJIFollowMeMissionStateReadyToStart:
+            return @"ReadyToStart";
+    }
+}
+
 - (IBAction)startFollowMe:(UIButton *)sender
 {
     WeakRef(target);
     DJIFollowMeMission* mission = (DJIFollowMeMission*)[self initializeMission];
     [self.followMeOperator startMission:mission withCompletion:^(NSError * _Nullable error) {
         if (error) {
-            ShowMessage(@"", @"Start Mission Failed:%@", error, @"OK");
+            ShowMessage(@"", (NSString*)[self descriptionForState:self.followMeOperator.currentState], error, @"OK");
         } else {
             [target missionDidStart:error];
         }
@@ -272,22 +289,7 @@
     [self startUpdateTimer];
 }
 
-+(NSString *)descriptionForState:(DJIFollowMeMissionState)state {
-    switch (state) {
-        case DJIFollowMeMissionStateUnknown:
-            return @"Unknown";
-        case DJIFollowMeMissionStateExecuting:
-            return @"Executing";
-        case DJIFollowMeMissionStateRecovering:
-            return @"Recovering";
-        case DJIFollowMeMissionStateDisconnected:
-            return @"Disconnected";
-        case DJIFollowMeMissionStateNotSupported:
-            return @"NotSupported";
-        case DJIFollowMeMissionStateReadyToStart:
-            return @"ReadyToStart";
-    }
-}
+
 
 
 @end
