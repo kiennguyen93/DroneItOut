@@ -27,6 +27,8 @@
 @property (nonatomic) CLLocationCoordinate2D target2;
 @property (nonatomic) CLLocationCoordinate2D prevTarget;
 @property (nonatomic) CLLocationCoordinate2D aircraftLocation;
+@property (nonatomic) double altitude;
+
 
 @property (nonatomic, strong) NSTimer* updateTimer;
 @property (nonatomic) BOOL isGoingToNorth; //Check if target is moving north
@@ -36,8 +38,6 @@
 @end
 
 @implementation FollowMeViewController
-@synthesize aircraftLocation = _aircraftLocation; //Letting "droneLocation" replace "aircraftLocation"?? Not sure if it will work.
-
 
 - (void)viewWillAppear:(BOOL)animated
 {
@@ -47,6 +47,7 @@
 
 -(void)flightController:(DJIFlightController *)fc didUpdateState:(DJIFlightControllerState *)state {
     self.aircraftLocation = state.aircraftLocation.coordinate;
+    self.altitude = state.altitude;
 }
 -(void)setAircraftLocation:(CLLocationCoordinate2D)aircraftLocation {
     //aircraftLocation = state.aircraftLocation.coordinate;
@@ -70,6 +71,7 @@
     CLLocation *location = [locationManager2 location];
     CLLocationCoordinate2D phoneCoordinate = [location coordinate];
     mission.followMeCoordinate = phoneCoordinate;
+    mission.followMeAltitude = self.altitude;
     mission.heading = DJIFollowMeHeadingTowardFollowPosition;
     
     return mission;
