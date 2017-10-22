@@ -33,7 +33,7 @@
 @property (nonatomic, strong) NSTimer* updateTimer;
 @property (nonatomic) BOOL isGoingToNorth; //Check if target is moving north
 //DJIFollowMeMissionOperator controls, runs and monitors FollowMe Missions
-//@property (nonatomic, weak) DJIFollowMeMissionOperator *followMeOperator;
+@property (nonatomic, weak) DJIFollowMeMissionOperator *followMeOperator;
 @property (strong, nonatomic) DJIFollowMeMission* followMeMission;
 
 @end
@@ -42,8 +42,8 @@
 
 - (void)viewWillAppear:(BOOL)animated
 {
-    [super viewWillAppear:animated];
     [self startUpdateLocation];
+    [super viewWillAppear:animated];
     //self.followMeOperator = [[DJISDKManager missionControl] followMeMissionOperator];
 }
 
@@ -123,6 +123,7 @@
 }
 
 -(void) initializeMission {
+    self.followMeOperator = [self missionOperator];
     self.followMeMission = [[DJIFollowMeMission alloc] init];
     self.followMeMission.followMeCoordinate = self.userLocation;
     //mission.followMeAltitude = state.altitude;
@@ -133,7 +134,7 @@
 {
     //WeakRef(target);
     [self initializeMission];
-    [[self missionOperator] startMission:self.followMeMission withCompletion:^(NSError * _Nullable error) {
+    [self.followMeOperator startMission:self.followMeMission withCompletion:^(NSError * _Nullable error) {
         if (error) {
             ShowMessage(@"Start Mission Failed", error.description, nil, @"OK");
         } else {
@@ -148,7 +149,7 @@
 
 - (IBAction)stopFollowMe:(UIButton *)sender
 {
-    [[self missionOperator] stopMissionWithCompletion:^(NSError * _Nullable error) {
+    [self.followMeOperator stopMissionWithCompletion:^(NSError * _Nullable error) {
         if (error) {
             NSString* failedMessage = [NSString stringWithFormat:@"Stop Mission Failed: %@", error.description];
             ShowMessage(@"", failedMessage, nil, @"OK");
@@ -209,26 +210,26 @@
     CLLocationCoordinate2D phoneCoordinate = [location coordinate];
     self.target2 = phoneCoordinate;
     self.currentTarget = self.target2;*/
-    [[self missionOperator] updateFollowMeCoordinate:self.userLocation];
+    [self.followMeOperator updateFollowMeCoordinate:self.userLocation];
     
     //self.prevTarget = target;
     
     //[self changeDirectionIfFarEnough];
 }
 
-+ (CLLocationDistance) calculateDistanceBetweenPoint:(CLLocationCoordinate2D)point1 andPoint:(CLLocationCoordinate2D)point2 {
+/*+ (CLLocationDistance) calculateDistanceBetweenPoint:(CLLocationCoordinate2D)point1 andPoint:(CLLocationCoordinate2D)point2 {
     CLLocation* location1 = [[CLLocation alloc] initWithLatitude:point1.latitude longitude:point1.longitude];
     CLLocation* location2 = [[CLLocation alloc] initWithLatitude:point2.latitude longitude:point2.longitude];
     
     return [location1 distanceFromLocation:location2];
-}
+}*/
 
 - (IBAction)loadRootView:(UIButton *)sender
 {
     [self performSegueWithIdentifier:@"FollowMeToRootViewSegue" sender:self];
 }
 
--(NSString *)descriptionForState:(DJIFollowMeMissionState)state {
+/*-(NSString *)descriptionForState:(DJIFollowMeMissionState)state {
     switch (state) {
         case DJIFollowMeMissionStateUnknown:
             return @"Unknown";
@@ -243,7 +244,7 @@
         case DJIFollowMeMissionStateReadyToStart:
             return @"ReadyToStart";
     }
-}
+}*/
 
 #pragma mark CLLocation Methods
 -(void) startUpdateLocation
