@@ -52,4 +52,20 @@
     
 }
 
+
+- (IBAction)altitudeDismiss:(id)sender {
+    [altitude resignFirstResponder];
+}
+
+- (IBAction)autoFlightSpeedDismiss:(id)sender {
+     [autoFlightSpeed resignFirstResponder];
+}
+
+- (IBAction)maxSpeedDismiss:(id)sender {
+     [maxSpeed resignFirstResponder];
+}
+
+
+
+
 @end

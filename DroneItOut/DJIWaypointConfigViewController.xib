@@ -5,7 +5,7 @@
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13174"/>
         <capability name="Alignment constraints to the first baseline" minToolsVersion="6.0"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -14,10 +14,13 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DJIWaypointConfigViewController">
             <connections>
                 <outlet property="actionSegmentedControl" destination="A3Y-CT-OuG" id="oFO-5r-4dV"/>
+                <outlet property="altitude" destination="uL9-y3-Xyd" id="XGA-Bi-hYR"/>
                 <outlet property="altitudeTextField" destination="uL9-y3-Xyd" id="yg1-pX-Ady"/>
+                <outlet property="autoFlightSpeed" destination="UZv-T1-PqT" id="wYG-DF-Vhj"/>
                 <outlet property="autoFlightSpeedTextField" destination="UZv-T1-PqT" id="YIs-Qr-KNw"/>
                 <outlet property="headingSegmentedControl" destination="XAv-6q-m7L" id="BMO-eA-aDW"/>
                 <outlet property="maxFlightSpeedTextField" destination="aop-RK-6dR" id="kXf-Tl-6b5"/>
+                <outlet property="maxSpeed" destination="aop-RK-6dR" id="UeG-Lc-i5i"/>
                 <outlet property="view" destination="zu1-ci-Ytl" id="KyJ-Ai-1LU"/>
             </connections>
         </placeholder>
@@ -68,6 +71,9 @@
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                     <textInputTraits key="textInputTraits"/>
+                    <connections>
+                        <action selector="altitudeDismiss:" destination="-1" eventType="editingDidEndOnExit" id="FyS-Mh-kI3"/>
+                    </connections>
                 </textField>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Action After Finished:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="7" translatesAutoresizingMaskIntoConstraints="NO" id="6g8-xY-pXb">
                     <rect key="frame" x="23" y="115" width="187" height="21"/>
@@ -128,6 +134,9 @@
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                     <textInputTraits key="textInputTraits"/>
+                    <connections>
+                        <action selector="autoFlightSpeedDismiss:" destination="-1" eventType="editingDidEndOnExit" id="RSX-2N-iX3"/>
+                    </connections>
                 </textField>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Max Flight Speed:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="7" translatesAutoresizingMaskIntoConstraints="NO" id="sB6-JT-tfW">
                     <rect key="frame" x="23" y="81" width="118" height="21"/>
@@ -145,6 +154,9 @@
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                     <textInputTraits key="textInputTraits"/>
+                    <connections>
+                        <action selector="maxSpeedDismiss:" destination="-1" eventType="editingDidEndOnExit" id="kbH-LD-e6e"/>
+                    </connections>
                 </textField>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Auto Flight Speed:" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="7" translatesAutoresizingMaskIntoConstraints="NO" id="n1U-gL-nZO">
                     <rect key="frame" x="186" y="42" width="59" height="21"/>

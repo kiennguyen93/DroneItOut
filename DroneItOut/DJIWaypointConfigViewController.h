@@ -17,7 +17,18 @@
 
 @end
 
-@interface DJIWaypointConfigViewController : UIViewController
+@interface DJIWaypointConfigViewController : UIViewController{
+    IBOutlet UITextField *altitude;
+    IBOutlet UITextField *autoFlightSpeed;
+    IBOutlet UITextField *maxSpeed;
+}
+    
+
+- (IBAction)altitudeDismiss:(id)sender;
+- (IBAction)autoFlightSpeedDismiss:(id)sender;
+- (IBAction)maxSpeedDismiss:(id)sender;
+
+
 
 @property (weak, nonatomic) IBOutlet UITextField *altitudeTextField;
 @property (weak, nonatomic) IBOutlet UITextField *autoFlightSpeedTextField;
