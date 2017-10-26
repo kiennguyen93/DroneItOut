@@ -9,4 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface FollowMeViewController : UIViewController
+
+- (void) callStartFollowMe;
+- (void) callStopFollowMe ;
 @end

@@ -3,6 +3,7 @@
 //
 
 #import "DJIRootViewController.h"
+#import "FollowMeViewController.h"
 #import <MapKit/MapKit.h>
 #import <CoreLocation/CoreLocation.h>
 #import <DJISDK/DJISDK.h>

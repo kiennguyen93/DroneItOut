@@ -14,11 +14,11 @@ import CoreLocation
 import CoreBluetooth
 
 class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTransactionDelegate, DJIFlightControllerDelegate, CLLocationManagerDelegate {
-    
-    
+ 
     //get instance of Objective-C class to call methods
-    var instanceOfDJIRootViewControllert: DJIRootViewController = DJIRootViewController()
-    //instanceOfDJIRootViewControllert.someMethod()
+    let instanceOfDJIRootViewControllert: DJIRootViewController = DJIRootViewController()
+    //objective-C object
+    let instanceofFollowMeViewController: FollowMeViewController = FollowMeViewController()
     
     //weak var appDelegate: AppDelegate! = UIApplication.shared.delegate as? AppDelegate
     
@@ -28,8 +28,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     //display text on screen
     @IBOutlet weak var recognitionText: UILabel!
-    
-    
+   
     let pointOffset: Double = 0.000179863
     //1 = 10m
     //1 m = 3.280399 ft
@@ -38,6 +37,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     //Calculation 1m = GPS point - 0.000284
     let myPointOffset: Double = 0.0000181
     let ALTITUDE: Float = 2
+    var distance: Double?
+    var direction: String?
+    var strArr: [String] = []
+    var d: Int = 0
     
     
     //SpeechKit variable
@@ -47,20 +50,21 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     var SKSLanguage = "eng-USA"
     
     //DJI variable
-    var appkey = "b268f50a003c96ab9fb53846"
     var connectionProduct: DJIBaseProduct? = nil
     
     //flight Controller
     var fc: DJIFlightController?
     var delegate: DJIFlightControllerDelegate?
-    var aircraftLocation: CLLocationCoordinate2D? = nil
+    var droneLocation: CLLocationCoordinate2D?
+    var aircraftLocation: CLLocationCoordinate2D = kCLLocationCoordinate2DInvalid
+    var aircraftHeading: CLLocationDegrees = 0
     
     //change DJIFlightControllerCurrentState to DJIFlightControllerState
-    var currentState: DJIFlightControllerState? = nil
+    var currentState: DJIFlightControllerState?
     var aircraft: DJIAircraft? = nil
     
     //mission variable
-    var missionManager: DJIMissionControl?
+    var missionManager: DJIWaypointMissionOperator?
     
     var hotpointMission: DJIHotpointMission = DJIHotpointMission()
     var mCurrentHotPointCoordinate: CLLocationCoordinate2D = kCLLocationCoordinate2DInvalid
@@ -71,9 +75,11 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     //store coordinate that uses to create waypoint mission
     var waypointList: [DJIWaypoint] = []
-    
-    var waypointMission: DJIWaypointMission = DJIMutableWaypointMission()
-    var mission = DJIMutableWaypointMission()
+    var waypointMission = DJIMutableWaypointMission()
+    //var mission = DJIMutableWaypointMission()
+    var missionOperator: DJIWaypointMissionOperator? {
+        return DJISDKManager.missionControl()?.waypointMissionOperator()
+    }
     
     var customMission: DJICustomMission? = nil
     var missionSetup: Bool = false
@@ -131,18 +137,44 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //mission manner
         //self.missionManager = DJIMissionControl.activeTrackMissionOperator(DJIMissionControl)()!
         //self.missionManager!.delegate = self
-        
-        let aircraft: DJIAircraft? = self.fetchAircraft()
-        if aircraft != nil {
-            aircraft!.delegate = self
-            aircraft!.flightController?.delegate = self
-        }
-        
+        // Setup the flight controller delegate
+      
+         let aircraft: DJIAircraft? = self.fetchAircraft()
+         if aircraft != nil {
+         aircraft!.delegate = self
+         aircraft!.flightController?.delegate = self
+         }
+
         missionStatusBar.setProgress(0, animated: true)
         
         //beign listening to user and this gets called repeatedly to ensure countinue listening
         beginApp()
         
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        guard let connectedKey = DJIProductKey(param: DJIParamConnection) else {
+            NSLog("Error creating the connectedKey")
+            return;
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            DJISDKManager.keyManager()?.startListeningForChanges(on: connectedKey, withListener: self, andUpdate: { (oldValue: DJIKeyedValue?, newValue : DJIKeyedValue?) in
+                if newValue != nil {
+                    if newValue!.boolValue {
+                        // At this point, a product is connected so we can show it.
+                        
+                        // UI goes on MT.
+                        DispatchQueue.main.async {
+                            DJISDKManager.product()
+                        }
+                    }
+                }
+            })
+        }
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        DJISDKManager.keyManager()?.stopAllListening(ofListeners: self)
     }
     func checkProductConnected() {
         
@@ -157,7 +189,13 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         }
         
     }
-    
+    func flightController(_ fc: DJIFlightController, didUpdateSystemState state: DJIFlightControllerState) {
+        
+        aircraftLocation = (state.aircraftLocation?.coordinate)!
+        aircraftHeading = (fc.compass?.heading)!
+        
+        positionText.text = "Altitude: " + String(state.altitude) + " m"
+    }
     
     enum SKSState {
         case sksIdle
@@ -183,7 +221,13 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             cancel()
         }
     }
-    
+    //refesh transaction and start listening
+    @IBAction func refeshButton(_ sender: Any) {
+        //reload application data (renew root view )
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        UIApplication.shared.keyWindow?.rootViewController = storyboard.instantiateViewController(withIdentifier: "VoiceViewController")
+        
+    }
     func reconize(){
         //begin to listening to user
         let options = [
@@ -264,88 +308,47 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         }
         
         // set and ensure fc is flight controller
-        fc = fetchFlightController()
-        if fc != nil{
-            fc!.delegate = self
-        }
+        let fc = (DJISDKManager.product() as! DJIAircraft).flightController
+        fc?.delegate = self
         
-        // use regex for NSEW compass direction
-        self.commands = findNSEWCommands(str: words)
-        if !commands.isEmpty {
-            runNSEWDirectionCommands()
-            commands = [] //reset commands array after it's done
-            orderText.text = "1"
-        }
-        
-        // use regex for longer commands
-        commands = findMovementCommands(str: words)
-        if !commands.isEmpty {
-            regexCommandText.text = "\(commands)"
-            //runMovementCommands()
-            commands = [] //reset commands array after it's done
-            orderText.text = "2"
-        }
-        
-        // use regex for short commands
-        commands = findShortMovementCommands(str: words)
-        regexCommandText.text = "\(commands)"
-        if !commands.isEmpty {
-            regexCommandText.text = "\(commands)"
-            runShortMovementCommands()
-            commands = [] //reset commands array after it's done
-            orderText.text = "3"
-        }
-        
+        /*
+         fc = fetchFlightController()
+         if fc != nil{
+         fc!.delegate = self
+         }
+         */
+        /*------------ERROR MAYBE HERE--------------------------------------*/
+        /*
+         // use regex for NSEW compass direction
+         commands = findNSEWCommands(str: words)
+         
+         if !commands.isEmpty {
+         //runNSEWDirectionCommands()
+         commands = [] //reset commands array after it's done
+         orderText.text = "1"
+         }
+         
+         // use regex for longer commands
+         commands = findMovementCommands(str: words)
+         if !commands.isEmpty {
+         regexCommandText.text = "\(commands)"
+         //runMovementCommands()
+         commands = [] //reset commands array after it's done
+         orderText.text = "2"
+         }
+         
+         // use regex for short commands
+         commands = findShortMovementCommands(str: words)
+         regexCommandText.text = "\(commands)"
+         if !commands.isEmpty {
+         regexCommandText.text = "\(commands)"
+         runShortMovementCommands()
+         commands = [] //reset commands array after it's done
+         orderText.text = "3"
+         }
+         */
         // if none of those regex are matched, it will go to a String
-        var strArr = words.characters.split{$0 == " "}.map(String.init)
-        
-        if strArr.count > 1 {
-            
-            
-            //take off
-            if strArr[0] == "take" && strArr[1] == "off" {
-                takeOff(fc)
-            }
-                /*
-                 else if strArr[0] == "go" && strArr[1] == "up" {
-                 runShortMovementCommands(direction: strArr[1])
-                 }
-                 else if strArr[0] == "go" && strArr[1] == "down" {
-                 runShortMovementCommands(direction: strArr[1])
-                 }
-                 else if strArr[0] == "go" && strArr[1] == "left" {
-                 runShortMovementCommands(direction: strArr[1])
-                 }
-                 else if strArr[0] == "go" && strArr[1] == "right" {
-                 runShortMovementCommands(direction: strArr[1])
-                 }
-                 else if strArr[0] == "go" && strArr[1] == "backward" {
-                 runShortMovementCommands(direction: strArr[1])
-                 }
-                 else if strArr[0] == "go" && strArr[1] == "forward" {
-                 runShortMovementCommands(direction: strArr[1])
-                 }
-                 */
-            else if (strArr[0] == "power" && strArr[1] == "on") || strArr[0] == "on" {
-                self.showAlertResult(info: "Power on function is not existed. Please say your next command !")
-                // startPropellers(fc)
-            }
-                //say "power off" to off propellers
-                //to ensure safety, this function will use auto land fuction to land the aircraft before turn off propellers
-            else if (strArr[0] == "power" && strArr[1] == "off") || strArr[0] == "off"{
-                stopPropellers(fc)
-            }
-                // say "goHome" to make the drone land
-            else if strArr[0] == "go" && strArr[1] == "home"{
-                goHome(fc)
-            }
-            else {
-                showAlertResult(info: "This command is not in the system, please say your next command !")
-                strArr.removeAll()
-            }
-            
-        }
-        
+        strArr = words.characters.split{$0 == " "}.map(String.init)
         //loop through all words
         for str in strArr{
             
@@ -368,6 +371,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             //say "execute" to executeMission
             if str == "execute" {
                 executeMission()
+                
             }
             
             // say "cancel" to cancel mission
@@ -377,79 +381,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
             // say "stop" to stop mission
             if str == "stop" {
-                pauseMissionSaid()
-                VSMText.text = "Mission paused"
-            }
-            // say "resume" to resume mission
-            if str == "resume" {
-                resumeMissionSaid()
-                VSMText.text = "Mission resume"
-            }
-            
-            
-            
-        }
-    }
-    
-    //*********** REGEX METHOD **************//
-    
-    //use only for new compass commands
-    func findNSEWCommands( str: String ) -> [String] {
-        let commandRegex = "\\s*(go)\\s(north|south|east|west)?\\s?((?:\\d*\\.)?\\d+)?\\s(feet|foot|meters|meter|m|ft)?"
-        let matched = matches(for: commandRegex,in: str )
-        print(matched)
-        return matched
-    }
-    //use for getting direction, distance, and units of measurements
-    func findMovementCommands( str: String ) -> [String] {
-        let commandRegex = "\\s*(go)\\s(left|right|up|down|forward|backward)?\\s?((?:\\d*\\.)?\\d+)?\\s(feet|foot|meters|meter|m|ft)"
-        let matched = matches(for: commandRegex,in: str )
-        print(matched)
-        return matched
-    }
-    //use for getting simple commands like "go left", "go right"
-    func findShortMovementCommands( str: String ) -> [String] {
-        let commandRegex = "\\s*(go)\\s(left|right|up|down|forward|backward)"
-        let matched = matches(for: commandRegex,in: str )
-        print(matched)
-        return matched
-    }
-    // matching function
-    //use regex to extract matches from string and retrun array of strings
-    func matches(for regex: String, in text: String) -> [String] {
-        do {
-            let regex = try NSRegularExpression(pattern: regex)
-            let nsString = text as NSString
-            let results = regex.matches(in: text, range: NSRange(location: 0, length: nsString.length))
-            //transform to all strings and return
-            return results.map { nsString.substring(with: $0.range)}
-        } catch let error {
-            print("invalid regex: \(error.localizedDescription)")
-            return []
-        }
-    }
-    
-    //******** RUN COMMANDS METHODS **********//
-    func runShortMovementCommands() {
-        var direction: String = ""
-        print("Short commands: \(commands)")
-        if commands.count > 0 {
-            for comm in commands {
-                var commandArr = comm.characters.split{$0 == " "}.map(String.init)
-                commandText.text = "\(commandArr[0])"
-                directionText.text = "\(commandArr[1])"
-                
-                
-                
-                if commandArr.count == 2 { //Go up
-                    direction = commandArr[1]
-                    distanceText.text = "\(direction)"
-                }
-                /*
-                 if commandArr.count == 3 { //Drone goes left
-                 direction = commandArr[2]
-                 }
-                 */
+                //pauseMissionSaid()
                 //initalize a data object. They have pitch, roll, yaw, and throttle
                 var commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
                 //flightCtrlData?.pitch = 0.5 - make it goes to the right a little bit 0.5m/s
@@ -458,52 +390,181 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 commandCtrlData?.roll = 0
                 commandCtrlData?.yaw = 0
                 commandCtrlData?.verticalThrottle = 0
-                
-                if direction == "left" {
-                    commandCtrlData?.pitch = -1.0
-                    directionTest.text = "test: go left"
-                    
-                }
-                if direction == "right" {
-                    commandCtrlData?.pitch = 1.0
-                    directionTest.text = "test: go right"
-                }
-                if direction == "up" {
-                    commandCtrlData?.verticalThrottle = 1.0
-                    directionTest.text = "go up"
-                }
-                if direction == "down" {
-                    commandCtrlData?.verticalThrottle = -1.0
-                    directionTest.text = "go down"
-                }
-                if direction == "forward" {
-                    commandCtrlData?.roll = 1.0
-                    directionTest.text = "go forward"
-                }
-                if direction == "backward"{
-                    commandCtrlData?.roll = -1.0
-                }
-                // enable Virtual Stick Mode which it disable function on remote control
+                VSMText.text = "Mission Stop"
                 enterVirtualStickMode( newFlightCtrlData: commandCtrlData!)
+            }
+            // say "resume" to resume mission
+            if str == "resume" {
+                resumeMissionSaid()
+                VSMText.text = "Mission resume"
+            }
+            
+        }
+        if strArr.count > 1 && strArr.count < 3{
+            
+            //take off
+            if strArr[0] == "take" && strArr[1] == "off" {
+                takeOff(fc)
+            }
+            if strArr[0] == "follow" && strArr[1] == "me" {
+                followMe()
+            }
+            if strArr[0] == "stop" && strArr[1] == "follow" {
+                stopFollow()
+            }
+            if (strArr[0] == "power" && strArr[1] == "on") || strArr[0] == "on" {
+                self.showAlertResult(info: "Power on function is not existed. Please say your next command !")
+                // startPropellers(fc)
+            }
+            //say "power off" to off propellers
+            //to ensure safety, this function will use auto land fuction to land the aircraft before turn off propellers
+            if (strArr[0] == "power" && strArr[1] == "off") || strArr[0] == "off"{
+                stopPropellers(fc)
+            }
+            // say "goHome" to make the drone land
+            if strArr[0] == "go" {
+                if strArr[1] == "home"{
+                    goHome(fc)
+                }
+                if strArr[1] == "up" {
+                    commands = ["go", "up"]
+                    regexCommandText.text = "\(commands)"
+                    runShortMovementCommands()
+                    commands = [] //reset commands array after it's done
+                    orderText.text = "1"
+                }
+                if strArr[1] == "down" {
+                    commands = ["go", "down"]
+                    regexCommandText.text = "\(commands)"
+                    runShortMovementCommands()
+                    commands = [] //reset commands array after it's done
+                    orderText.text = "1"
+                }
+                if strArr[1] == "left" {
+                    commands = ["go", "left"]
+                    regexCommandText.text = "\(commands)"
+                    runShortMovementCommands()
+                    commands = [] //reset commands array after it's done
+                    orderText.text = "1"
+                }
+                if strArr[1] == "right" {
+                    commands = ["go", "right"]
+                    regexCommandText.text = "\(commands)"
+                    runShortMovementCommands()
+                    commands = [] //reset commands array after it's done
+                    orderText.text = "1"
+                }
+                if strArr[1] == "forward" {
+                    commands = ["go", "forward"]
+                    regexCommandText.text = "\(commands)"
+                    runShortMovementCommands()
+                    commands = [] //reset commands array after it's done
+                    orderText.text = "1"
+                }
+                if strArr[1] == "backward" {
+                    commands = ["go", "backward"]
+                    regexCommandText.text = "\(commands)"
+                    runShortMovementCommands()
+                    commands = [] //reset commands array after it's done
+                    orderText.text = "1"
+                }
+            }
+            
+        }
+            //Exmple: Go north 5 m, or go up 5 ,
+        else if strArr.count > 2{
+            //check if strArr[2] is Int
+            // if isStringAnInt(string: strArr[2])
+            // if the speech match with "go [up, down, left, right, forward, backward, north, south, west, east] [Digit] [m,meter,meters]
+            if (strArr[0] == "go" && (strArr[1] == "north" || strArr[1] == "south" || strArr[1] == "west" || strArr[1] == "east" || strArr[1] == "up" || strArr[1] == "down" || strArr[1] == "left" || strArr[1] == "right" || strArr[1] == "backward" || strArr[1] == "forward") && self.isStringAnDouble(string: strArr[2]) == true && (strArr[3] == "m" || strArr[3] == "meter" || strArr[3] == "meters")) {
+                direction = strArr[1]
+                distance = Double(strArr[2])
+                
+                //set to label
+                directionText.text = direction
+                distanceText.text = String(describing: distance)
+                orderText.text = "2"
+                
+                runLongCommands(dir: direction!, dist: distance!)
+                regexCommandText.text = "\(commands)"
+                commands = [] //reset commands array after it's done
+            }
+            else {
+                self.showAlertResult(info: "Command not found, say your next command!")
             }
         }
     }
+    func isStringAnDouble(string: String) -> Bool {
+        return Double(string) != nil
+    }
+    
+    //******** RUN COMMANDS METHODS **********//
+    func followMe(){
+        instanceofFollowMeViewController.callStartFollowMe()
+    }
+    func stopFollow(){
+        instanceofFollowMeViewController.callStopFollowMe()
+    }
+    func runShortMovementCommands() {
+        var direction: String = ""
+        print("Short commands: \(commands)")
+        if strArr.count == 2 { //Go up
+            direction = strArr[1]
+            distanceText.text = "\(direction)"
+        }
+        
+        //initalize a data object. They have pitch, roll, yaw, and throttle
+        var commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
+        //flightCtrlData?.pitch = 0.5 - make it goes to the right a little bit 0.5m/s
+        //Here is where data gets changed
+        //commandCtrlData?.pitch = 0
+        //commandCtrlData?.roll = 0
+        //commandCtrlData?.yaw = 0
+        //commandCtrlData?.verticalThrottle = 0
+        
+        if direction == "left" {
+            directionTest.text = "test: go left"
+            commandCtrlData?.pitch = -1.0
+        }
+        if direction == "right" {
+            commandCtrlData?.pitch = 1.0
+            directionTest.text = "test: go right"
+        }
+        if direction == "up" {
+            commandCtrlData?.verticalThrottle = 1.0
+            directionTest.text = "go up"
+        }
+        if direction == "down" {
+            commandCtrlData?.verticalThrottle = -1.0
+            directionTest.text = "go down"
+        }
+        if direction == "forward" {
+            commandCtrlData?.roll = 1.0
+            directionTest.text = "go forward"
+        }
+        if direction == "backward"{
+            commandCtrlData?.roll = -1.0
+        }
+        // enable Virtual Stick Mode which it disable function on remote control
+        enterVirtualStickMode( newFlightCtrlData: commandCtrlData!)
+        
+    }
+    
     
     func enterVirtualStickMode( newFlightCtrlData: DJIVirtualStickFlightControlData) {
         // x, y , z = forward, right, downward
         
         //cancel the missions just in case they are running
-        cancelMissionSaid()
+        //cancelMissionSaid()
         
-        aircraft = self.fetchAircraft()
+        
+        //aircraft = self.fetchAircraft()
         fc = self.fetchFlightController()
         fc?.delegate = self
+        
         if fc != nil {
-            //must first enable virtual control stick mode
-            //fc?.enableVirtualStickControlMode(completion: {(error: Error?) ->Void in
-            //replace enableVirtualStickControlMode to getVirtualStickModeEnabled
+            //First, you must enable virtual control stick mode,then send virtual stick commands
             fc?.getVirtualStickModeEnabled(completion: {(true, error: Error?)  ->Void in
-                
                 if error != nil {
                     self.VSMText.text = "virtual stick mode is not enabled: \(String(describing: error))"
                 }
@@ -514,162 +575,194 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                     self.fc?.rollPitchControlMode = DJIVirtualStickRollPitchControlMode.velocity
                     self.fc?.verticalControlMode = DJIVirtualStickVerticalControlMode.velocity
                     
-                    //DJIVirtualStickFlightCoordinateSystem.body doesn't work anymore
                     self.fc?.rollPitchCoordinateSystem = DJIVirtualStickFlightCoordinateSystem.ground
                     //self.fc?.rollPitchCoordinateSystem = DJIVirtualStickFlightCoordinateSystem.body
                     
-                    var flightCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
+                    var flightCtrlData: DJIVirtualStickFlightControlData = DJIVirtualStickFlightControlData.init()
                     
-                    //Here is where the data gets changed
-                    flightCtrlData?.pitch = newFlightCtrlData.pitch
-                    flightCtrlData?.roll = newFlightCtrlData.roll
-                    flightCtrlData?.yaw = newFlightCtrlData.yaw
-                    flightCtrlData?.verticalThrottle = newFlightCtrlData.verticalThrottle
-                    
-                    self.commandText.text = "\(String(describing: self.fc?.isVirtualStickControlModeAvailable()))"
+                    //Flight data gets changed
+                    flightCtrlData.pitch = newFlightCtrlData.pitch
+                    flightCtrlData.roll = newFlightCtrlData.roll
+                    flightCtrlData.yaw = newFlightCtrlData.yaw
+                    flightCtrlData.verticalThrottle = newFlightCtrlData.verticalThrottle
                     
                     //if VirtualStickControlMode is available, the data will be sent and drone will perfom command
                     if (self.fc?.isVirtualStickControlModeAvailable())! {
                         self.directionText.text = "Virtual stick control is available"
                         
-                        self.fc?.send(flightCtrlData!, withCompletion: {(error: Error?) -> Void in
+                        
+                        self.fc?.send(flightCtrlData, withCompletion: {(error: Error?) -> Void in
                             if error != nil {
                                 self.VSMText.text = "could not send data: \(String(describing: error))"
                             }
                             else {
                                 self.VSMText.text = "Data was sent"
+                                while self.d < 5 {
+                                    self.enterVirtualStickMode(newFlightCtrlData: newFlightCtrlData)
+                                    self.self.d = self.d + 1
+                                }
                             }
                         })
                     }
                     else {
-                        self.VSMText.text = "Virtual stick control mode is unavailable"
+                        self.VSMText.text = "VSC mode is unavailable"
                     }
+                    
                 }
             })
         }
     }
-    func runNSEWDirectionCommands(){
-        //if the recongnition text matchesthe NSEW regex,then this method will execute
-        if commands.count > 0 {
-            for comm in commands {
-                var dist: String
-                var direction: String
-                var units: String
-                
-                var commandArr = comm.characters.split{$0 == " "}.map(String.init)
-                
-                direction = commandArr[1]
-                
-                if commandArr[2] == "by" {
-                    if commandArr[3] == "to" { commandArr[3] = "2" }
-                    if commandArr[3] == "to0" { commandArr[3] = "2" }
-                    distanceText.text = "\(commandArr[3])"
-                    dist = commandArr[3]
-                    unitText.text = "\(commandArr[4])"
-                    units = commandArr[4]
-                }
-                else if commandArr[2] == "for" {
-                    if commandArr[3] == "to" { commandArr[3] = "2"}
-                    if commandArr[3] == "too" { commandArr[3] = "2"}
-                    distanceText.text = "\(commandArr[3])"
-                    dist = commandArr[3]
-                    unitText.text = "\(commandArr[4])"
-                    units = commandArr[4]
-                    
-                } else {
-                    if commandArr[3] == "to" { commandArr[3] = "2"}
-                    if commandArr[3] == "too" { commandArr[3] = "2"}
-                    distanceText.text = "\(commandArr[3])"
-                    dist = commandArr[3]
-                    unitText.text = "\(commandArr[4])"
-                    units = commandArr[4]
-                }
-                let distance: Double = Double(dist)!
-                //by here, we have each command being seperated into direction, distance, units
-                // next steps are find location, distance and direction of drone
-                
-                //cancel the current mission and remove all waypoints form waypoint list
-                cancelMissionSaid()
-                self.mission.removeAllWaypoints()
-                
-                //get drone's location
-                var droneLocation: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
-                
-                if ((self.currentState != nil) && CLLocationCoordinate2DIsValid(aircraftLocation!)){
-                    
-                    //droneLocation = CLLocationCoordinate2D(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude)
-                    droneLocation = aircraftLocation!
-                    
-                    //my conversion CLLocationCoordinate2DIsValid to CLLocation
-                    /*
-                     var getLat: CLLocationDegrees = droneLocation.latitude
-                     var getLon: CLLocationDegrees = droneLocation.longitude
-                     var center: CLLocation =  CLLocation(latitude: getLat, longitude: getLon)
-                     */
-                    
-                    //finding GPS location
-                    let waypoint: DJIWaypoint = DJIWaypoint(coordinate: droneLocation)
-                    waypoint.altitude = ALTITUDE
-                    
-                    self.mission.add(waypoint)
-                }
-                var lat: Double = droneLocation.latitude
-                var long: Double = droneLocation.longitude
-                
-                var commLoc: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
-                
-                //if units are in meters
-                //convert all unit to GPS coordinate points
-                if units == "m" || units == "meter" || units == "meters" {
-                    if direction == "east" {
-                        long = long + convertMetersToPoint(m: distance)
-                    }
-                    if direction == "west" {
-                        long = long + convertMetersToPoint(m: distance)
-                    }
-                    if direction == "noth" {
-                        lat = lat + convertMetersToPoint(m: distance)
-                    }
-                    if direction == "south" {
-                        lat = lat + convertMetersToPoint(m: distance)
-                    }
-                }
-                // if units are in feet
-                if units == "ft" || units == "feet" || units == "foot" {
-                    if direction == "east" {
-                        long = long + convertMetersToPoint(m: distance)
-                    }
-                    if direction == "west" {
-                        long = long + convertMetersToPoint(m: distance)
-                    }
-                    if direction == "noth" {
-                        lat = lat + convertMetersToPoint(m: distance)
-                    }
-                    if direction == "south" {
-                        lat = lat + convertMetersToPoint(m: distance)
-                    }
-                }
-                commLoc.latitude = lat
-                commLoc.longitude = long
-                positionText.text = "\(commLoc.latitude)"
-                
-                if CLLocationCoordinate2DIsValid(commLoc) {
-                    let commWayPoint: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
-                    commWayPoint.altitude = ALTITUDE
-                    self.mission.add(commWayPoint)
-                }
-                
-                // 5 mission paramenter always needed
-                self.mission.maxFlightSpeed = 2
-                self.mission.autoFlightSpeed = 1
-                self.mission.headingMode = DJIWaypointMissionHeadingMode.auto
-                self.mission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
-                mission.finishedAction = DJIWaypointMissionFinishedAction.noAction
-                
-                //prepare mission
-                prepareMission(missionName: self.mission)
+    
+    func runLongCommands(dir: String, dist: Double){
+        //by here, we have each command being seperated into direction, distance, units
+        // next steps are find location, distance and direction of drone
+        
+        // cancelMissionSaid()
+        self.waypointMission.removeAllWaypoints()
+        waypointMission = DJIMutableWaypointMission()
+
+        
+        // 5 mission paramenter always needed
+        self.waypointMission.maxFlightSpeed = 2
+        self.waypointMission.autoFlightSpeed = 1
+        self.waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
+        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
+        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
+        
+        //get drone's location
+        guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
+            return
+        }
+        guard let droneLocationValue = DJISDKManager.keyManager()?.getValueFor(locationKey) else {
+            return
+        }
+        //convert CLLocation to CLLocationCoordinate2D
+        let droneLocation0 = droneLocationValue.value as! CLLocation
+        self.droneLocation = droneLocation0.coordinate
+        //self.droneLocation = currentState?.aircraftLocation?
+        
+        //second way to get drone location
+        /*
+        guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
+            NSLog("Couldn't create the key")
+            return
+        }
+        guard let keyManager = DJISDKManager.keyManager() else {
+            print("Couldn't get the keyManager")
+            // This will happen if not registered
+            return
+        }
+        keyManager.startListeningForChanges(on: locationKey, withListener: self) { (oldValue, newValue) in
+            if newValue != nil {
+                 location0 = newValue!.value as! CLLocation
+                self.droneLocation = location0.coordinate
             }
         }
+        */
+        
+        //add first waypoint
+        let loc1 = CLLocationCoordinate2DMake((droneLocation?.latitude)! + myPointOffset, (droneLocation?.longitude)!)
+        let waypoint: DJIWaypoint = DJIWaypoint(coordinate: loc1)
+        //finding GPS location
+        
+        waypoint.altitude = ALTITUDE
+        self.waypointMission.add(waypoint)
+        
+        var lat: Double = droneLocation!.latitude
+        var long: Double = droneLocation!.longitude
+        
+        //if units are in meters
+        //convert all unit to GPS coordinate points
+        
+        if dir == "east" || dir == "right"{
+            long = long + convertMetersToPoint(m: dist)
+        }
+        if dir == "west" || dir == "left" {
+            long = long - convertMetersToPoint(m: dist)
+        }
+        if dir == "noth" || dir == "up"{
+            lat = lat + convertMetersToPoint(m: dist)
+        }
+        if dir == "south" || dir == "down"{
+            lat = lat - convertMetersToPoint(m: dist)
+        }
+        //this is second waypoint
+        var commLoc: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
+        commLoc.latitude = lat
+        commLoc.longitude = long
+        positionText.text = "\(commLoc.latitude)"
+        print(commLoc)
+        
+        if CLLocationCoordinate2DIsValid(commLoc) {
+            let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
+            //waypoint2.altitude = 24
+            self.waypointMission.add(waypoint2)
+        }
+        
+        //prepare mission
+        prepareMission(missionName: self.waypointMission)
+    }
+    
+    /*-----------if this doesn't work, try to call enterVirtualStickmode------------------------*/
+    func prepareMission(missionName: DJIWaypointMission){
+        
+        print("Mission prepared!")
+        // Upload the mission and then execute it
+   
+        func didMissionUpload(error: Error?){
+            
+            if error != nil {
+                self.showAlertResult(info: "Error uploading mission: " + (error?.localizedDescription)!)
+            }
+            else {
+                self.showAlertResult(info: "Uploading mission sucessful, starting mission..!")
+                // start mission
+                missionOperator?.startMission(completion: didMissionStart)
+            }
+            
+        }
+        func didMissionStart(error: Error?) {
+            
+            if error != nil {
+                self.showAlertResult(info: "Error starting waypoint mission: " + (error?.localizedDescription)!)
+                print("Error starting waypoint mission: " + (error?.localizedDescription)!)
+            }
+            else {
+                self.showAlertResult(info: "Start mission succesfully")
+                print("Start Mission sucess")
+            }
+        }
+        missionOperator?.addListener(toUploadEvent: self, with: DispatchQueue.main, andBlock: { (event) in
+            if event.error != nil {
+                self.showAlertResult(info: "There was an error trying to upload the mission, trying again")
+                print("There was an error trying to upload the mission, trying again")
+                self.missionOperator?.uploadMission(completion: didMissionUpload )
+            }
+            else {
+                self.showAlertResult(info:"Mission was uploaded, Starting mission")
+                print("Mission was uploaded, Starting mission")
+                // start mission
+                self.missionOperator?.startMission(completion: didMissionStart )
+            }
+        })
+        /*
+        missionOperator?.addListener(toStarted: self, with: DispatchQueue.main, andBlock: {
+            self.showAlertResult(info: "Mission started successfully")
+        })
+        
+        missionOperator?.addListener(toFinished: self, with: DispatchQueue.main, andBlock: { (error) in
+            if error != nil {
+                self.showAlertResult(info: "Mission execution failed")
+            } else {
+                self.showAlertResult(info: "Mission execution finished")
+            }
+        })
+ */
+        missionOperator?.load(missionName)
+        missionOperator?.uploadMission(completion: didMissionUpload)
+        
+
+       
     }
     //when virtual stick mode is enabled, use are no longer able to use remote control
     func enableVirtualStickModeSaid() {
@@ -715,13 +808,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
         })
     }
-    fileprivate var started = false
-    fileprivate var paused = false
     
     func cancelMissionSaid() {
         //need to define DJIWaypointMissionOperator
         //var oper: DJIWaypointMissionOperator
-        
         
         print("Mission Cancelled !")
         DJISDKManager.missionControl()?.stopTimeline()
@@ -738,13 +828,16 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     func executeMission(){
         print("Mission executed !")
-        if self.paused {
-            DJISDKManager.missionControl()?.resumeTimeline()
-        } else if self.started {
-            DJISDKManager.missionControl()?.pauseTimeline()
-        } else {
-            DJISDKManager.missionControl()?.startTimeline()
-        }
+        missionOperator?.startMission(completion: { (error) in
+            if error != nil {
+                self.showAlertResult(info: "Start mission error: " + (error?.localizedDescription)!)
+                print("Start Mission error !" + (error?.localizedDescription)!)
+            }
+            else {
+                self.showAlertResult(info: "Start mission successful")
+                print("Start Mission scuessful !")
+            }
+        })
     }
     func convertMetersToPoint(m: Double) -> Double{
         var lonO:Double = 0.0
@@ -758,53 +851,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         lonO = dLon * 180/pi
         return lonO
     }
-    func prepareMission(missionName: DJIWaypointMission){
-        print("Mission prepared!")
-        //executeMission()
-        // Upload the mission and then execute it
-        // Setting up the mission manager
-        /*
-         mission = DJIWaypointMission
-         self.mission.(mission, withProgress: nil, withCompletion:
-         {[weak self] (error: NSError?) -> Void in
-         if error == nil {
-         self?.missionManager!.startMissionExecutionWithCompletion({ [weak self] (error: NSError?) -> Void in
-         if error != nil {
-         print("Error starting mission" + "abcd")
-         self!.logDebug("Error starting mission: " + (error?.description)!)
-         
-         }
-         })
-         } else {
-         print("Error preparing mission")
-         self!.logDebug("Error preparing mission: " + (error?.description)!)
-         }
-         
-         })
-         */
-    }
+    
     
     //************ Flight Controller Drone Method *****************//
-    //DJI took away turnOnMotors, they may open it for the next comming version
-    //so we can just call takeoff
-    /*
-     func startPropellers(_ fc: DJIFlightController!) {
-     print("fc = \(fc)")
-     if fc != nil {
-     fc!.turnOnMotors(completion: {[weak self](error: Error?) -> Void in
-     if error != nil {
-     self?.showAlertResult(info: "TurnOn Error: \(error!.localizedDescription)")
-     }
-     else {
-     self?.showAlertResult(info: "Turnon Succeeded.")
-     }
-     })
-     }
-     else {
-     self.showAlertResult(info: "Start Propellers Component not existed")
-     }
-     }
-     */
     func takeOff(_ fc: DJIFlightController!) {
         if fc != nil {
             
@@ -904,6 +953,18 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             
         })
     }
+    func productConnected() {
+        guard let newProduct = DJISDKManager.product() else {
+            NSLog("Product is connected but DJISDKManager.product is nil -> something is wrong")
+            return;
+        }
+    }
+    
+    func productDisconnected() {
+        NSLog("Product Disconnected")
+    }
+    
     
     
 }
+

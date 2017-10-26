@@ -340,5 +340,10 @@
     
     [self startUpdateTimer];
 }*/
-
+- (void) callStartFollowMe {
+    [self startFollowMe:nil];
+}
+- (void) callStopFollowMe {
+    [self startFollowMe:nil];
+}
 @end
