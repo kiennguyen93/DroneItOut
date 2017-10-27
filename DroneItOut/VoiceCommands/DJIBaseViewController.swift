@@ -218,11 +218,18 @@ class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProduc
             message = "success"
         }
         
+       
         let alert = UIAlertController(title: "Message", message: "\(message ?? "")", preferredStyle: .alert)
         // add an action (button)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
         // show the alert
-        self.present(alert, animated: true, completion: nil)
+        if presentedViewController == nil {
+            self.present(alert, animated: true, completion: nil)
+        } else{
+            self.dismiss(animated: false) { () -> Void in
+                self.present(alert, animated: true, completion: nil)
+            }
+        }
     }
     
     

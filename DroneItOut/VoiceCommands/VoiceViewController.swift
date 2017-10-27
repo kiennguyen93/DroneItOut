@@ -14,7 +14,7 @@ import CoreLocation
 import CoreBluetooth
 
 class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTransactionDelegate, DJIFlightControllerDelegate, CLLocationManagerDelegate {
- 
+    
     //get instance of Objective-C class to call methods
     let instanceOfDJIRootViewControllert: DJIRootViewController = DJIRootViewController()
     //objective-C object
@@ -28,7 +28,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     //display text on screen
     @IBOutlet weak var recognitionText: UILabel!
-   
+    
     let pointOffset: Double = 0.000179863
     //1 = 10m
     //1 m = 3.280399 ft
@@ -138,13 +138,13 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //self.missionManager = DJIMissionControl.activeTrackMissionOperator(DJIMissionControl)()!
         //self.missionManager!.delegate = self
         // Setup the flight controller delegate
-      
-         let aircraft: DJIAircraft? = self.fetchAircraft()
-         if aircraft != nil {
-         aircraft!.delegate = self
-         aircraft!.flightController?.delegate = self
-         }
-
+        
+        let aircraft: DJIAircraft? = self.fetchAircraft()
+        if aircraft != nil {
+            aircraft!.delegate = self
+            aircraft!.flightController?.delegate = self
+        }
+        
         missionStatusBar.setProgress(0, animated: true)
         
         //beign listening to user and this gets called repeatedly to ensure countinue listening
@@ -224,9 +224,12 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     //refesh transaction and start listening
     @IBAction func refeshButton(_ sender: Any) {
         //reload application data (renew root view )
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        UIApplication.shared.keyWindow?.rootViewController = storyboard.instantiateViewController(withIdentifier: "VoiceViewController")
+       // let storyboard = UIStoryboard(name: "Main", bundle: nil)
+       // UIApplication.shared.keyWindow?.rootViewController = storyboard.instantiateViewController(withIdentifier: "VoiceViewController")
         
+        let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "VoiceViewController")
+        UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
+
     }
     func reconize(){
         //begin to listening to user
@@ -290,13 +293,51 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         state = .sksIdle
         stateText.text = "Idle"
         //convert all text to lowercase
-        recognitionText.text = recognition.text.lowercased()
-        print("recognition recieved: \(recognition.text)")
-        print("state: \(state)")
+        
         
         
         //make an array of word said
         var words = recognition.text.lowercased()
+        strArr = words.characters.split{$0 == " "}.map(String.init)
+        
+        
+        if (strArr[0] == "goal") {
+            strArr[0] = "go"
+        }
+        if strArr[0] == "alright" {
+            strArr[0] = "go"
+            strArr.append("right")
+        }
+        if strArr.count == 2 {
+            if strArr[0] == "call" {
+                strArr[0] = "go"
+            }
+            if strArr[1] == "ride" {
+                strArr[1] = "right"
+            }
+            if strArr[1] == "let" {
+                strArr[1] = "left"
+            }
+        }
+        if strArr.count == 3 {
+            if strArr[2] == "to" || strArr[2] == "by" || strArr[2] == "for" {
+                strArr.remove(at: 2)
+            }
+            if strArr[1] == "for" && strArr[2] == "work" {
+                strArr[1] = "forward"
+                strArr.remove(at: 2)
+            }
+            if strArr[1] == "back" && strArr[2] == "work" {
+                strArr[1] = "backward"
+                strArr.remove(at: 2)
+            }
+            
+        }
+       
+        let joinwords = strArr.joined(separator: " ")
+        recognitionText.text = joinwords
+        print("recognition recieved: \(recognition.text)")
+        print("state: \(state)")
         
         //nuance catches 1 as "one", so we need to change it
         if #available(iOS 9.0, *) {
@@ -347,8 +388,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
          orderText.text = "3"
          }
          */
-        // if none of those regex are matched, it will go to a String
-        strArr = words.characters.split{$0 == " "}.map(String.init)
+        
         //loop through all words
         for str in strArr{
             
@@ -371,27 +411,15 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             //say "execute" to executeMission
             if str == "execute" {
                 executeMission()
-                
             }
-            
             // say "cancel" to cancel mission
             if str == "cancel" {
-                cancelMissionSaid()
+               stopWaypointMissioin()
                 VSMText.text = "Mission cancelled"
             }
             // say "stop" to stop mission
             if str == "stop" {
-                //pauseMissionSaid()
-                //initalize a data object. They have pitch, roll, yaw, and throttle
-                var commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
-                //flightCtrlData?.pitch = 0.5 - make it goes to the right a little bit 0.5m/s
-                //Here is where data gets changed
-                commandCtrlData?.pitch = 0
-                commandCtrlData?.roll = 0
-                commandCtrlData?.yaw = 0
-                commandCtrlData?.verticalThrottle = 0
-                VSMText.text = "Mission Stop"
-                enterVirtualStickMode( newFlightCtrlData: commandCtrlData!)
+                stopWaypointMissioin()
             }
             // say "resume" to resume mission
             if str == "resume" {
@@ -411,15 +439,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
             if strArr[0] == "stop" && strArr[1] == "follow" {
                 stopFollow()
-            }
-            if (strArr[0] == "power" && strArr[1] == "on") || strArr[0] == "on" {
-                self.showAlertResult(info: "Power on function is not existed. Please say your next command !")
-                // startPropellers(fc)
-            }
-            //say "power off" to off propellers
-            //to ensure safety, this function will use auto land fuction to land the aircraft before turn off propellers
-            if (strArr[0] == "power" && strArr[1] == "off") || strArr[0] == "off"{
-                stopPropellers(fc)
             }
             // say "goHome" to make the drone land
             if strArr[0] == "go" {
@@ -523,12 +542,12 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //commandCtrlData?.verticalThrottle = 0
         
         if direction == "left" {
-            directionTest.text = "test: go left"
+            directionTest.text = "go left"
             commandCtrlData?.pitch = -1.0
         }
         if direction == "right" {
             commandCtrlData?.pitch = 1.0
-            directionTest.text = "test: go right"
+            directionTest.text = "go right"
         }
         if direction == "up" {
             commandCtrlData?.verticalThrottle = 1.0
@@ -544,6 +563,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         }
         if direction == "backward"{
             commandCtrlData?.roll = -1.0
+            directionTest.text = "go backward"
         }
         // enable Virtual Stick Mode which it disable function on remote control
         enterVirtualStickMode( newFlightCtrlData: commandCtrlData!)
@@ -597,10 +617,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                             }
                             else {
                                 self.VSMText.text = "Data was sent"
-                                while self.d < 5 {
-                                    self.enterVirtualStickMode(newFlightCtrlData: newFlightCtrlData)
-                                    self.self.d = self.d + 1
-                                }
                             }
                         })
                     }
@@ -620,7 +636,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         // cancelMissionSaid()
         self.waypointMission.removeAllWaypoints()
         waypointMission = DJIMutableWaypointMission()
-
+        
         
         // 5 mission paramenter always needed
         self.waypointMission.maxFlightSpeed = 2
@@ -643,59 +659,58 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         //second way to get drone location
         /*
-        guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
-            NSLog("Couldn't create the key")
-            return
-        }
-        guard let keyManager = DJISDKManager.keyManager() else {
-            print("Couldn't get the keyManager")
-            // This will happen if not registered
-            return
-        }
-        keyManager.startListeningForChanges(on: locationKey, withListener: self) { (oldValue, newValue) in
-            if newValue != nil {
-                 location0 = newValue!.value as! CLLocation
-                self.droneLocation = location0.coordinate
-            }
-        }
-        */
-        
-        //add first waypoint
-        let loc1 = CLLocationCoordinate2DMake((droneLocation?.latitude)! + myPointOffset, (droneLocation?.longitude)!)
-        let waypoint: DJIWaypoint = DJIWaypoint(coordinate: loc1)
-        //finding GPS location
-        
-        waypoint.altitude = ALTITUDE
-        self.waypointMission.add(waypoint)
-        
+         guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
+         NSLog("Couldn't create the key")
+         return
+         }
+         guard let keyManager = DJISDKManager.keyManager() else {
+         print("Couldn't get the keyManager")
+         // This will happen if not registered
+         return
+         }
+         keyManager.startListeningForChanges(on: locationKey, withListener: self) { (oldValue, newValue) in
+         if newValue != nil {
+         location0 = newValue!.value as! CLLocation
+         self.droneLocation = location0.coordinate
+         }
+         }
+         */
         var lat: Double = droneLocation!.latitude
         var long: Double = droneLocation!.longitude
+        
+        //add first waypoint
+        //let loc1 = CLLocationCoordinate2DMake((droneLocation?.latitude)! + myPointOffset, (droneLocation?.longitude)!)
+        let loc1 = CLLocationCoordinate2DMake(lat, long)
+        let waypoint: DJIWaypoint = DJIWaypoint(coordinate: loc1)
+        waypoint.altitude = ALTITUDE
+        self.waypointMission.add(waypoint)
         
         //if units are in meters
         //convert all unit to GPS coordinate points
         
-        if dir == "east" || dir == "right"{
+        if dir == "east" || dir == "up"{
             long = long + convertMetersToPoint(m: dist)
         }
-        if dir == "west" || dir == "left" {
+        if dir == "west" || dir == "down" {
             long = long - convertMetersToPoint(m: dist)
         }
-        if dir == "noth" || dir == "up"{
-            lat = lat + convertMetersToPoint(m: dist)
+        if dir == "noth" || dir == "right"{
+            lat = lat + convertMetersToPointLat(m: dist)
         }
-        if dir == "south" || dir == "down"{
-            lat = lat - convertMetersToPoint(m: dist)
+        if dir == "south" || dir == "left"{
+            lat = lat - convertMetersToPointLat(m: dist)
         }
+        
         //this is second waypoint
         var commLoc: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
         commLoc.latitude = lat
         commLoc.longitude = long
         positionText.text = "\(commLoc.latitude)"
-        print(commLoc)
+        print("position now is " + String(describing: commLoc) )
         
         if CLLocationCoordinate2DIsValid(commLoc) {
             let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
-            //waypoint2.altitude = 24
+            waypoint2.altitude = ALTITUDE
             self.waypointMission.add(waypoint2)
         }
         
@@ -706,18 +721,29 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     /*-----------if this doesn't work, try to call enterVirtualStickmode------------------------*/
     func prepareMission(missionName: DJIWaypointMission){
         
-        print("Mission prepared!")
-        // Upload the mission and then execute it
+        let error = missionName.checkParameters()
+        if error != nil {
+            showAlertResult(info: "Waypoint Mission parameters are invalid: \(String(describing: error))")
+            return
+        }
+        else {
+            showAlertResult(info: "Validated Mission's Waypoints")
+        }
    
+        
+        print("Mission prepared!")
         func didMissionUpload(error: Error?){
             
             if error != nil {
                 self.showAlertResult(info: "Error uploading mission: " + (error?.localizedDescription)!)
+                print("error uploading mission: " + (error?.localizedDescription)!)
             }
             else {
-                self.showAlertResult(info: "Uploading mission sucessful, starting mission..!")
+                self.showAlertResult(info: "Uploading mission sucessfully, starting mission..!")
+                print("uploading mission successfil, starting mission..!")
                 // start mission
                 missionOperator?.startMission(completion: didMissionStart)
+                
             }
             
         }
@@ -732,11 +758,13 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 print("Start Mission sucess")
             }
         }
-        missionOperator?.addListener(toUploadEvent: self, with: DispatchQueue.main, andBlock: { (event) in
+        missionOperator?.load(missionName)
+        // Upload the mission and then execute it
+        missionOperator?.addListener(toUploadEvent: self, with: DispatchQueue.main, andBlock: {(event) in
             if event.error != nil {
                 self.showAlertResult(info: "There was an error trying to upload the mission, trying again")
                 print("There was an error trying to upload the mission, trying again")
-                self.missionOperator?.uploadMission(completion: didMissionUpload )
+                self.missionOperator?.uploadMission(completion: didMissionUpload)
             }
             else {
                 self.showAlertResult(info:"Mission was uploaded, Starting mission")
@@ -745,25 +773,11 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 self.missionOperator?.startMission(completion: didMissionStart )
             }
         })
-        /*
-        missionOperator?.addListener(toStarted: self, with: DispatchQueue.main, andBlock: {
-            self.showAlertResult(info: "Mission started successfully")
-        })
         
-        missionOperator?.addListener(toFinished: self, with: DispatchQueue.main, andBlock: { (error) in
-            if error != nil {
-                self.showAlertResult(info: "Mission execution failed")
-            } else {
-                self.showAlertResult(info: "Mission execution finished")
-            }
-        })
- */
-        missionOperator?.load(missionName)
         missionOperator?.uploadMission(completion: didMissionUpload)
         
-
-       
     }
+    
     //when virtual stick mode is enabled, use are no longer able to use remote control
     func enableVirtualStickModeSaid() {
         //replace enableVirtualStickControlMode to setVirtualStickModeEnabled
@@ -808,23 +822,38 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
         })
     }
+
     
-    func cancelMissionSaid() {
-        //need to define DJIWaypointMissionOperator
-        //var oper: DJIWaypointMissionOperator
-        
-        print("Mission Cancelled !")
-        DJISDKManager.missionControl()?.stopTimeline()
-    }
     func pauseMissionSaid(){
-        print("Mission paused !")
-        DJISDKManager.missionControl()?.stopTimeline()
-        // DJISDKManager.missionControl()?.pauseTimeline()
+        missionOperator?.pauseMission(completion: { (error: Error?) in
+            if error != nil {
+                self.showAlertResult(info: "Error pause mission " + (error?.localizedDescription)!)
+            }
+            else {
+                self.showAlertResult(info: "Mission pause sucessfully!")
+            }
+        })
         
+    }
+    func stopWaypointMissioin(){
+        missionOperator?.stopMission(completion: { (error: Error?) in
+            if error != nil {
+                self.showAlertResult(info: "Error stop mission " + (error?.localizedDescription)!)
+            }
+            else {
+                self.showAlertResult(info: "Mission stoped sucessfully!")
+            }
+        })
     }
     func resumeMissionSaid(){
-        print("Mission resume !")
-        DJISDKManager.missionControl()?.resumeTimeline()
+        missionOperator?.resumeMission(completion: { (error: Error?) in
+            if error != nil {
+                self.showAlertResult(info: "Error resume mission " + (error?.localizedDescription)!)
+            }
+            else {
+                self.showAlertResult(info: "Mission resume sucessfully!")
+            }
+        })
     }
     func executeMission(){
         print("Mission executed !")
@@ -850,6 +879,35 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         lonO = dLon * 180/pi
         return lonO
+    }
+    func convertMetersToPointLat(m: Double) -> Double{
+        var lat0:Double = 0.0
+        //Earth’s radius, sphere
+        let R:Double = 6378137.0
+        //offset in meters
+        let dn:Double = 100
+        //Coordinate offsets in radians
+        let pi:Double = Double.pi
+        let dLat = dn/R
+
+        lat0 = dLat*180/pi
+        return lat0
+    }
+    func convertMeterToLongitude(m: Double) -> Double{
+        // 1 mile = 1609.34 m
+        //1m = 0.000621371
+        //
+        //Latitude: 1 deg = 110.54 km
+        //Longitude: 1 deg = 111.320*cos(latitude) km
+        let km = m/1000
+        let latitudeDegree = km/110.54
+        let longitudeDegree = 111.320*cos(latitudeDegree)
+        return longitudeDegree
+    }
+    func convertMeterToLatitude(m: Double) -> Double{
+        let km = m/1000
+        let latitudeDegree = km/110.54
+        return latitudeDegree
     }
     
     
@@ -963,8 +1021,21 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     func productDisconnected() {
         NSLog("Product Disconnected")
     }
-    
-    
-    
+}
+extension UIApplication {
+    class func topViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+        if let nav = base as? UINavigationController {
+            return topViewController(base: nav.visibleViewController)
+        }
+        if let tab = base as? UITabBarController {
+            if let selected = tab.selectedViewController {
+                return topViewController(base: selected)
+            }
+        }
+        if let presented = base?.presentedViewController {
+            return topViewController(base: presented)
+        }
+        return base
+    }
 }
 

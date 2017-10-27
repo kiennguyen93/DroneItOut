@@ -231,7 +231,7 @@
         <!--Voice View Controller-->
         <scene sceneID="u6F-qz-E7k">
             <objects>
-                <viewController id="niB-1P-ogp" customClass="VoiceViewController" customModule="DroneItOut" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="VoiceViewController" id="niB-1P-ogp" customClass="VoiceViewController" customModule="DroneItOut" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="DOm-07-Ywi"/>
                         <viewControllerLayoutGuide type="bottom" id="pBH-2r-RDl"/>
