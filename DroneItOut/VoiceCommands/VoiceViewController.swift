@@ -634,16 +634,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         // next steps are find location, distance and direction of drone
         
         // cancelMissionSaid()
-        self.waypointMission.removeAllWaypoints()
+        waypointMission.removeAllWaypoints()
         waypointMission = DJIMutableWaypointMission()
-        
-        
-        // 5 mission paramenter always needed
-        self.waypointMission.maxFlightSpeed = 2
-        self.waypointMission.autoFlightSpeed = 1
-        self.waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
-        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
-        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
         
         //get drone's location
         guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
@@ -682,7 +674,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //let loc1 = CLLocationCoordinate2DMake((droneLocation?.latitude)! + myPointOffset, (droneLocation?.longitude)!)
         let loc1 = CLLocationCoordinate2DMake(lat, long)
         let waypoint: DJIWaypoint = DJIWaypoint(coordinate: loc1)
-        waypoint.altitude = ALTITUDE
+        waypoint.altitude = 3
         self.waypointMission.add(waypoint)
         
         //if units are in meters
@@ -710,9 +702,17 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         if CLLocationCoordinate2DIsValid(commLoc) {
             let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
-            waypoint2.altitude = ALTITUDE
+            waypoint2.altitude = 10
             self.waypointMission.add(waypoint2)
         }
+        
+        // 5 mission paramenter always needed
+        waypointMission.maxFlightSpeed = 2
+        waypointMission.autoFlightSpeed = 1
+        waypointMission.repeatTimes = 1
+        waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
+        waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
+        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
         
         //prepare mission
         prepareMission(missionName: self.waypointMission)
