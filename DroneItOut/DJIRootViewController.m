@@ -63,11 +63,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.data = [[NSArray alloc]initWithObjects:@"VoiceSimulator", @"Voice Commands", @"Follow Me", nil];
+    self.data = [[NSArray alloc]initWithObjects: @"Voice Commands", @"Follow Me",nil];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
+     self.tableView.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.59999999999999998];
+    self.tableView.backgroundView.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.59999999999999998];
     self.tableView.hidden = YES;
-
+   
+ 
     [self registerApp];
     
     [self initUI];
@@ -83,11 +86,14 @@
     static NSString *simpleTableIdentifier = @"Modes";
     
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:simpleTableIdentifier];
+    cell.backgroundColor = [UIColor blackColor];
     if (cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:simpleTableIdentifier];
     }
     cell.textLabel.text = [self.data objectAtIndex:indexPath.row];
-                return cell;
+    cell.textLabel.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.59999999999999998];
+    return cell;
+    
                 
 }
 
