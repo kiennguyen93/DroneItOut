@@ -36,7 +36,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     //Calculation 1m = GPS point - 0.000284
     let myPointOffset: Double = 0.0000181
-    let ALTITUDE: Float = 2
+    var ALTITUDE: Float = 2
     var distance: Double?
     var direction: String?
     var strArr: [String] = []
@@ -301,14 +301,14 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         strArr = words.characters.split{$0 == " "}.map(String.init)
         
         
-        if (strArr[0] == "goal") {
+        if strArr[0] == "goal" {
             strArr[0] = "go"
         }
         if strArr[0] == "alright" {
             strArr[0] = "go"
             strArr.append("right")
         }
-        if strArr.count == 2 {
+        if strArr.count == 2 || strArr.count == 3{
             if strArr[0] == "call" {
                 strArr[0] = "go"
             }
@@ -320,6 +320,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
         }
         if strArr.count == 3 {
+            if strArr[0] == "call" {
+                strArr[0] = "go"
+            }
             if strArr[2] == "to" || strArr[2] == "by" || strArr[2] == "for" {
                 strArr.remove(at: 2)
             }
@@ -525,6 +528,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         instanceofFollowMeViewController.callStopFollowMe()
     }
     func runShortMovementCommands() {
+        enableVirtualStickModeSaid()
         var direction: String = ""
         print("Short commands: \(commands)")
         if strArr.count == 2 { //Go up
@@ -575,8 +579,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         // x, y , z = forward, right, downward
         
         //cancel the missions just in case they are running
-        //cancelMissionSaid()
-        
+        //stopWaypointMissioin()
         
         //aircraft = self.fetchAircraft()
         fc = self.fetchFlightController()
@@ -609,8 +612,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                     //if VirtualStickControlMode is available, the data will be sent and drone will perfom command
                     if (self.fc?.isVirtualStickControlModeAvailable())! {
                         self.directionText.text = "Virtual stick control is available"
-                        
-                        
                         self.fc?.send(flightCtrlData, withCompletion: {(error: Error?) -> Void in
                             if error != nil {
                                 self.VSMText.text = "could not send data: \(String(describing: error))"
@@ -632,9 +633,11 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     func runLongCommands(dir: String, dist: Double){
         //by here, we have each command being seperated into direction, distance, units
         // next steps are find location, distance and direction of drone
-        
+        disableVirtualStickModeSaid()
         // cancelMissionSaid()
+        stopWaypointMissioin()
         waypointMission.removeAllWaypoints()
+        
         waypointMission = DJIMutableWaypointMission()
         
         //get drone's location
@@ -674,22 +677,24 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //let loc1 = CLLocationCoordinate2DMake((droneLocation?.latitude)! + myPointOffset, (droneLocation?.longitude)!)
         let loc1 = CLLocationCoordinate2DMake(lat, long)
         let waypoint: DJIWaypoint = DJIWaypoint(coordinate: loc1)
-        waypoint.altitude = 3
+        waypoint.altitude = ALTITUDE
         self.waypointMission.add(waypoint)
         
         //if units are in meters
         //convert all unit to GPS coordinate points
         
-        if dir == "east" || dir == "up"{
+        if dir == "north" || dir == "up"{
             long = long + convertMetersToPoint(m: dist)
+            ALTITUDE = ALTITUDE + Float(dist)
         }
-        if dir == "west" || dir == "down" {
+        if dir == "south" || dir == "down" {
             long = long - convertMetersToPoint(m: dist)
+            ALTITUDE = ALTITUDE - Float(dist)
         }
-        if dir == "noth" || dir == "right"{
+        if dir == "east" || dir == "right"{
             lat = lat + convertMetersToPointLat(m: dist)
         }
-        if dir == "south" || dir == "left"{
+        if dir == "west" || dir == "left"{
             lat = lat - convertMetersToPointLat(m: dist)
         }
         
@@ -702,14 +707,14 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         if CLLocationCoordinate2DIsValid(commLoc) {
             let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
-            waypoint2.altitude = 10
+            waypoint2.altitude = ALTITUDE
+            
             self.waypointMission.add(waypoint2)
         }
-        
         // 5 mission paramenter always needed
         waypointMission.maxFlightSpeed = 2
         waypointMission.autoFlightSpeed = 1
-        waypointMission.repeatTimes = 1
+        waypointMission.repeatTimes = 0
         waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
         waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
         waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
@@ -717,10 +722,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //prepare mission
         prepareMission(missionName: self.waypointMission)
     }
-    
-    /*-----------if this doesn't work, try to call enterVirtualStickmode------------------------*/
     func prepareMission(missionName: DJIWaypointMission){
-        
         let error = missionName.checkParameters()
         if error != nil {
             showAlertResult(info: "Waypoint Mission parameters are invalid: \(String(describing: error))")
@@ -729,8 +731,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         else {
             showAlertResult(info: "Validated Mission's Waypoints")
         }
-   
-        
         print("Mission prepared!")
         func didMissionUpload(error: Error?){
             
@@ -743,9 +743,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 print("uploading mission successfil, starting mission..!")
                 // start mission
                 missionOperator?.startMission(completion: didMissionStart)
-                
             }
-            
         }
         func didMissionStart(error: Error?) {
             
@@ -777,8 +775,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         missionOperator?.uploadMission(completion: didMissionUpload)
         
     }
-    
-    //when virtual stick mode is enabled, use are no longer able to use remote control
+    //when virtual stick mode is enabled, user can't control aircraft by remote control
     func enableVirtualStickModeSaid() {
         //replace enableVirtualStickControlMode to setVirtualStickModeEnabled
         fc?.setVirtualStickModeEnabled(true, withCompletion: { (error: Error?) in
@@ -789,9 +786,12 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 self.VSMText.text = "virtual stick mode enabled"
                 //missing some codes
                 //initalize a data object. They have pitch, roll, yaw, and throttle
-                let commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
-                
-                self.enterVirtualStickMode( newFlightCtrlData: commandCtrlData!)
+                var commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
+                commandCtrlData?.pitch = 0
+                commandCtrlData?.roll = 0
+                commandCtrlData?.yaw = 0
+                commandCtrlData?.verticalThrottle = 0
+ 
                 self.commandText.text = "\(String(describing: self.fc?.isVirtualStickControlModeAvailable()))"
                 
             }
@@ -800,16 +800,12 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     //disable Virtual Stick Mode so you can use remote control
     func disableVirtualStickModeSaid() {
-        //replace disableVirtualStickControlMode to setVirtualStickModeEnabled
         fc?.setVirtualStickModeEnabled(false, withCompletion: { (error: Error?) in
-            
             if error != nil {
                 self.VSMText.text = "virtual stick mode is not disabled: \(String(describing: error))"
             }
             else {
                 self.VSMText.text = "virtual stick mode is disabled"
-                //missing some codes
-                
                 var commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
                 //Here is where data gets changed
                 commandCtrlData?.pitch = 0
@@ -818,12 +814,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 commandCtrlData?.verticalThrottle = 0
                 
                 self.commandText.text = "\(String(describing: self.fc?.isVirtualStickControlModeAvailable()))"
-                
             }
         })
     }
-
-    
     func pauseMissionSaid(){
         missionOperator?.pauseMission(completion: { (error: Error?) in
             if error != nil {
@@ -833,7 +826,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 self.showAlertResult(info: "Mission pause sucessfully!")
             }
         })
-        
     }
     func stopWaypointMissioin(){
         missionOperator?.stopMission(completion: { (error: Error?) in
