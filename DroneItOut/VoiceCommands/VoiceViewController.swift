@@ -100,7 +100,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     //@IBOutlet weak var htext: UILabel!
     @IBOutlet weak var regexCommandText: UILabel!
     
-    @IBOutlet weak var positionText: UILabel!
+    @IBOutlet weak var positionLatText: UILabel!
+    @IBOutlet weak var positionLonText: UILabel!
     
     @IBOutlet weak var directionTest: UILabel!
     @IBOutlet weak var stateText: UILabel!
@@ -194,7 +195,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         aircraftLocation = (state.aircraftLocation?.coordinate)!
         aircraftHeading = (fc.compass?.heading)!
         
-        positionText.text = "Altitude: " + String(state.altitude) + " m"
+        positionLonText.text = "Altitude: " + String(state.altitude) + " m"
     }
     
     enum SKSState {
@@ -354,43 +355,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         // set and ensure fc is flight controller
         let fc = (DJISDKManager.product() as! DJIAircraft).flightController
         fc?.delegate = self
-        
-        /*
-         fc = fetchFlightController()
-         if fc != nil{
-         fc!.delegate = self
-         }
-         */
-        /*------------ERROR MAYBE HERE--------------------------------------*/
-        /*
-         // use regex for NSEW compass direction
-         commands = findNSEWCommands(str: words)
-         
-         if !commands.isEmpty {
-         //runNSEWDirectionCommands()
-         commands = [] //reset commands array after it's done
-         orderText.text = "1"
-         }
-         
-         // use regex for longer commands
-         commands = findMovementCommands(str: words)
-         if !commands.isEmpty {
-         regexCommandText.text = "\(commands)"
-         //runMovementCommands()
-         commands = [] //reset commands array after it's done
-         orderText.text = "2"
-         }
-         
-         // use regex for short commands
-         commands = findShortMovementCommands(str: words)
-         regexCommandText.text = "\(commands)"
-         if !commands.isEmpty {
-         regexCommandText.text = "\(commands)"
-         runShortMovementCommands()
-         commands = [] //reset commands array after it's done
-         orderText.text = "3"
-         }
-         */
+
         
         //loop through all words
         for str in strArr{
@@ -504,7 +469,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 
                 //set to label
                 directionText.text = direction
-                distanceText.text = String(describing: distance)
+                distanceText.text = "\(distance)"
                 orderText.text = "2"
                 
                 runLongCommands(dir: direction!, dist: distance!)
@@ -574,7 +539,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
     }
     
-    
     func enterVirtualStickMode( newFlightCtrlData: DJIVirtualStickFlightControlData) {
         // x, y , z = forward, right, downward
         
@@ -635,10 +599,16 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         // next steps are find location, distance and direction of drone
         disableVirtualStickModeSaid()
         // cancelMissionSaid()
-        stopWaypointMissioin()
-        waypointMission.removeAllWaypoints()
-        
+        self.waypointMission.removeAllWaypoints()
         waypointMission = DJIMutableWaypointMission()
+        
+        
+        // 5 mission paramenter always needed
+        self.waypointMission.maxFlightSpeed = 2
+        self.waypointMission.autoFlightSpeed = 1
+        self.waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
+        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
+        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
         
         //get drone's location
         guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
@@ -677,24 +647,24 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //let loc1 = CLLocationCoordinate2DMake((droneLocation?.latitude)! + myPointOffset, (droneLocation?.longitude)!)
         let loc1 = CLLocationCoordinate2DMake(lat, long)
         let waypoint: DJIWaypoint = DJIWaypoint(coordinate: loc1)
-        waypoint.altitude = ALTITUDE
+        waypoint.altitude = Float(droneLocation0.altitude)
         self.waypointMission.add(waypoint)
         
         //if units are in meters
         //convert all unit to GPS coordinate points
         
-        if dir == "north" || dir == "up"{
-            long = long + convertMetersToPoint(m: dist)
-            ALTITUDE = ALTITUDE + Float(dist)
+        if dir == "east" || dir == "up"{
+            //long = long + convertMetersToPoint(m: dist)
+            ALTITUDE = Float(droneLocation0.altitude) + Float(dist)
         }
-        if dir == "south" || dir == "down" {
-            long = long - convertMetersToPoint(m: dist)
-            ALTITUDE = ALTITUDE - Float(dist)
+        if dir == "west" || dir == "down" {
+            //long = long - convertMetersToPoint(m: dist)
+            ALTITUDE = Float(droneLocation0.altitude) - Float(dist)
         }
-        if dir == "east" || dir == "right"{
+        if dir == "noth" || dir == "right"{
             lat = lat + convertMetersToPointLat(m: dist)
         }
-        if dir == "west" || dir == "left"{
+        if dir == "south" || dir == "left"{
             lat = lat - convertMetersToPointLat(m: dist)
         }
         
@@ -702,27 +672,20 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         var commLoc: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
         commLoc.latitude = lat
         commLoc.longitude = long
-        positionText.text = "\(commLoc.latitude)"
+        positionLatText.text = "\(commLoc.latitude)"
+        positionLonText.text = "\(commLoc.longitude)"
         print("position now is " + String(describing: commLoc) )
         
         if CLLocationCoordinate2DIsValid(commLoc) {
             let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
             waypoint2.altitude = ALTITUDE
-            
             self.waypointMission.add(waypoint2)
         }
-        // 5 mission paramenter always needed
-        waypointMission.maxFlightSpeed = 2
-        waypointMission.autoFlightSpeed = 1
-        waypointMission.repeatTimes = 0
-        waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
-        waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
-        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
-        
         //prepare mission
         prepareMission(missionName: self.waypointMission)
     }
     func prepareMission(missionName: DJIWaypointMission){
+        
         let error = missionName.checkParameters()
         if error != nil {
             showAlertResult(info: "Waypoint Mission parameters are invalid: \(String(describing: error))")
@@ -731,6 +694,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         else {
             showAlertResult(info: "Validated Mission's Waypoints")
         }
+ 
         print("Mission prepared!")
         func didMissionUpload(error: Error?){
             
@@ -873,16 +837,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         return lonO
     }
     func convertMetersToPointLat(m: Double) -> Double{
-        var lat0:Double = 0.0
-        //Earth’s radius, sphere
-        let R:Double = 6378137.0
-        //offset in meters
-        let dn:Double = 100
-        //Coordinate offsets in radians
-        let pi:Double = Double.pi
-        let dLat = dn/R
-
-        lat0 = dLat*180/pi
+        //111 km = 1 lat
+        ///111 m = 0.001 lat
+        let lat0:Double = (m * 0.001)/111
+        
         return lat0
     }
     func convertMeterToLongitude(m: Double) -> Double{
@@ -901,7 +859,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         let latitudeDegree = km/110.54
         return latitudeDegree
     }
-    
     
     //************ Flight Controller Drone Method *****************//
     func takeOff(_ fc: DJIFlightController!) {
@@ -987,7 +944,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             
         })
     }
-    
     func enableMaxFlightRadius(_ fc: DJIFlightController!) {
         //set maximum height is 20m
         self.setMaxFlightHeight(fc)
