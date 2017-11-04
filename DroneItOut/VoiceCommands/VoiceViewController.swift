@@ -320,7 +320,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 strArr[1] = "left"
             }
         }
-        if strArr.count == 3 {
+        if strArr.count == 3 { // go for work
             if strArr[0] == "call" {
                 strArr[0] = "go"
             }
@@ -328,12 +328,14 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 strArr.remove(at: 2)
             }
             if strArr[1] == "for" && strArr[2] == "work" {
+                
                 strArr[1] = "forward"
-                strArr.remove(at: 2)
+                strArr.remove(at: strArr.index(of: "work")!)
+
             }
             if strArr[1] == "back" && strArr[2] == "work" {
                 strArr[1] = "backward"
-                strArr.remove(at: 2)
+                strArr.remove(at: strArr.index(of: "work")!)
             }
             
         }
@@ -364,10 +366,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             if str == "land" {
                 land(fc)
             }
-            //set boudary limit height and radius within 20m
-            if str == "limit" {
-                enableMaxFlightRadius(fc)
-            }
             //say "enable" to enable virtual stick mode
             if str == "enable" {
                 enableVirtualStickModeSaid()
@@ -394,7 +392,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 resumeMissionSaid()
                 VSMText.text = "Mission resume"
             }
-            
+            //say "predefined" to predefine paths
+            if str == "predefined" {
+                predefinedPath()
+            }
         }
         if strArr.count > 1 && strArr.count < 3{
             
@@ -475,6 +476,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 runLongCommands(dir: direction!, dist: distance!)
                 regexCommandText.text = "\(commands)"
                 commands = [] //reset commands array after it's done
+            }
+           //set boudary limit height and radius within 20m
+            else if  strArr[0] == "limit" && isNumber(stringToTest: strArr[1]) == true && strArr[2] == "m"{
+                enableMaxFlightRadius(fc,dist: strArr[1])
             }
             else {
                 self.showAlertResult(info: "Command not found, say your next command!")
@@ -859,7 +864,13 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         let latitudeDegree = km/110.54
         return latitudeDegree
     }
-    
+    func isNumber(stringToTest : String) -> Bool {
+        let numberCharacters = CharacterSet.decimalDigits.inverted
+        return !stringToTest.isEmpty && stringToTest.rangeOfCharacter(from:numberCharacters) == nil
+    }
+    func predefinedPath(){
+        
+    }
     //************ Flight Controller Drone Method *****************//
     func takeOff(_ fc: DJIFlightController!) {
         if fc != nil {
@@ -926,28 +937,26 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             self.showAlertResult(info: "Turn Off Component not existed")
         }
     }
-    func setMaxFlightHeight(_ fc: DJIFlightController!) {
+    func setMaxFlightHeight(_ fc: DJIFlightController!, distance: Float) {
         //set maximum height is 20m
-        fc.setMaxFlightHeight(20, withCompletion: {[weak self](error: Error?) -> Void in
+        fc.setMaxFlightHeight(distance, withCompletion: {[weak self](error: Error?) -> Void in
             if error != nil {
                 self?.showAlertResult(info: "Max Height Error: \(error!.localizedDescription)")
             }
-            
         })
     }
-    func setMaxFlightRadius(_ fc: DJIFlightController!) {
+    func setMaxFlightRadius(_ fc: DJIFlightController!, distance: Float) {
         //set maximum height is 20m
-        fc.setMaxFlightRadius(20, withCompletion: {[weak self](error: Error?) -> Void in
+        fc.setMaxFlightRadius(distance, withCompletion: {[weak self](error: Error?) -> Void in
             if error != nil {
                 self?.showAlertResult(info: "Max Radius Error: \(error!.localizedDescription)")
             }
-            
         })
     }
-    func enableMaxFlightRadius(_ fc: DJIFlightController!) {
-        //set maximum height is 20m
-        self.setMaxFlightHeight(fc)
-        self.setMaxFlightRadius(fc)
+    func enableMaxFlightRadius(_ fc: DJIFlightController!, dist: String) {
+        let distance = Float(dist)
+        self.setMaxFlightHeight(fc,distance: distance!)
+        self.setMaxFlightRadius(fc,distance: distance!)
         fc.setMaxFlightRadiusLimitationEnabled(true, withCompletion: {[weak self](error: Error?) -> Void in
             if error != nil {
                 self?.showAlertResult(info: "Enable Max Flight Radius Error: \(error!.localizedDescription)")

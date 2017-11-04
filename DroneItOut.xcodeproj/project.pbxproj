@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		69CE51B131FF2EFF2E187B8E /* libPods-DroneItOut.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */; };
+		9718164E1FAE4D0B00624A8A /* PredefinedPathViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9718164D1FAE4D0B00624A8A /* PredefinedPathViewController.swift */; };
 		976B61881F8C581B00CFDCD9 /* DJIBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */; };
 		976B618A1F8C58F800CFDCD9 /* DJICustomMission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */; };
 		979F8FDF1F73982800FC0477 /* simulator in Resources */ = {isa = PBXBuildFile; fileRef = 979F8FDE1F73982800FC0477 /* simulator */; };
@@ -33,6 +34,7 @@
 /* Begin PBXFileReference section */
 		0203E5861C9C0B5F00A69BCF /* DroneItOut-pch.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DroneItOut-pch.pch"; sourceTree = "<group>"; };
 		2343C3CF5B8FF564E79D3578 /* libPods-DroneItOut.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-DroneItOut.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9718164D1FAE4D0B00624A8A /* PredefinedPathViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredefinedPathViewController.swift; sourceTree = "<group>"; };
 		976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJIBaseViewController.swift; sourceTree = "<group>"; };
 		976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJICustomMission.swift; sourceTree = "<group>"; };
 		979F8FDE1F73982800FC0477 /* simulator */ = {isa = PBXFileReference; lastKnownFileType = folder; path = simulator; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				EF27F7001F8C0DEF00DA83B7 /* VoiceViewController.swift */,
 				976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */,
 				976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */,
+				9718164D1FAE4D0B00624A8A /* PredefinedPathViewController.swift */,
 			);
 			path = VoiceCommands;
 			sourceTree = "<group>";
@@ -343,6 +346,7 @@
 				EF27F7011F8C0DEF00DA83B7 /* VoiceViewController.swift in Sources */,
 				A4507F301CB506F20037861C /* DemoUtility.m in Sources */,
 				EF3A417A1F7D513A005958D3 /* FollowMeViewController.m in Sources */,
+				9718164E1FAE4D0B00624A8A /* PredefinedPathViewController.swift in Sources */,
 				A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */,
 				A4507F2B1CB506D40037861C /* DJIWaypointConfigViewController.m in Sources */,
 				A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */,
