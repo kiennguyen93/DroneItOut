@@ -63,7 +63,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.data = [[NSArray alloc]initWithObjects: @"Voice Commands", @"Follow Me",nil];
+    self.data = [[NSArray alloc]initWithObjects: @"Voice Commands", @"Follow Me", @"Predefined", nil];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
      self.tableView.backgroundColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.0 alpha:0.59999999999999998];
@@ -106,9 +106,13 @@
     {
         [self performSegueWithIdentifier:@"FollowMeSegue" sender:self];
     }
-    else if([cell.textLabel.text isEqualToString:@"Voice Commands"])
+    if([cell.textLabel.text isEqualToString:@"Voice Commands"])
     {
         [self performSegueWithIdentifier:@"VoiceSegue" sender:self];
+    }
+    else if([cell.textLabel.text isEqualToString:@"Predefined"])
+    {
+        [self performSegueWithIdentifier:@"PredefinedPathSegue" sender:self];
     }
 }
 - (IBAction)btnAction:(id)sender{

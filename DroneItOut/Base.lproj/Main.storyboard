@@ -205,7 +205,7 @@
                                 </constraints>
                             </view>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" sectionIndexMinimumDisplayRowCount="2" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Sk0-YN-lhE">
-                                <rect key="frame" x="387" y="119" width="168" height="83"/>
+                                <rect key="frame" x="387" y="119" width="168" height="123"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="168" id="hOH-bm-xp5"/>
@@ -238,7 +238,7 @@
                                 <variation key="heightClass=compact" constant="72"/>
                             </constraint>
                             <constraint firstItem="Gf1-2w-0eg" firstAttribute="top" secondItem="tdE-bu-rKa" secondAttribute="bottom" constant="16" id="FJ5-o9-M5O"/>
-                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Sk0-YN-lhE" secondAttribute="bottom" constant="118" id="GPM-JZ-5Lr"/>
+                            <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Sk0-YN-lhE" secondAttribute="bottom" constant="78" id="GPM-JZ-5Lr"/>
                             <constraint firstItem="Sk0-YN-lhE" firstAttribute="trailing" secondItem="Gf1-2w-0eg" secondAttribute="trailing" id="MJg-Pe-feP"/>
                             <constraint firstItem="gkc-2y-dBR" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="XGW-YZ-S9x"/>
                             <constraint firstItem="wfy-db-euE" firstAttribute="top" secondItem="Gf1-2w-0eg" secondAttribute="bottom" constant="202" id="bVx-YU-Sd2"/>
