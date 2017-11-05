@@ -102,9 +102,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     @IBOutlet weak var positionLatText: UILabel!
     @IBOutlet weak var positionLonText: UILabel!
-    
     @IBOutlet weak var directionTest: UILabel!
     @IBOutlet weak var stateText: UILabel!
+    
+    @IBOutlet weak var predefinedButton: UIButton!
     @IBAction func loadRootView(_ sender: UIButton)
     {
         performSegue(withIdentifier: "VoiceToRootViewSegue", sender: Any?.self)
@@ -309,6 +310,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             strArr[0] = "go"
             strArr.append("right")
         }
+        if strArr[0] == "redefine" || strArr[0] == "redefined" || strArr[0] == "predefine"{
+            strArr[0] = "predefined"
+        }
         if strArr.count == 2 || strArr.count == 3{
             if strArr[0] == "call" {
                 strArr[0] = "go"
@@ -394,7 +398,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
             //say "predefined" to predefine paths
             if str == "predefined" {
-                predefinedPath()
+                let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PredefinedPathViewController")
+                UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
+
             }
         }
         if strArr.count > 1 && strArr.count < 3{
@@ -868,9 +874,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         let numberCharacters = CharacterSet.decimalDigits.inverted
         return !stringToTest.isEmpty && stringToTest.rangeOfCharacter(from:numberCharacters) == nil
     }
-    func predefinedPath(){
-        
-    }
+
     //************ Flight Controller Drone Method *****************//
     func takeOff(_ fc: DJIFlightController!) {
         if fc != nil {

@@ -54,7 +54,6 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     var locs: [CLLocationCoordinate2D] = []
     var speed: Double = 0
     var currentWaypoint: DJIWaypoint? = nil
-    var waypointList: [DJIWaypoint] = []
     var waypointMission = DJIMutableWaypointMission()
     var missionOperator: DJIWaypointMissionOperator? {
         return DJISDKManager.missionControl()?.waypointMissionOperator()
@@ -62,7 +61,6 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
   
     //label name for debugging
     @IBOutlet weak var directionText: UILabel!
-    @IBOutlet weak var distanceText: UILabel!
     @IBOutlet weak var positionLatText: UILabel!
     @IBOutlet weak var positionLonText: UILabel!
     @IBOutlet weak var stateText: UILabel!
@@ -80,9 +78,9 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         
         // start nuance session with my account
         sksSession = SKSession(url: URL(string: SKSServerUrl), appToken: SKSAppKey)
-        sksTransaction = nil
+        //sksTransaction = nil
         
-        //sksTransaction = sksSession!.recognize(withType: SKTransactionSpeechTypeDictation,detection: .short, language: SKSLanguage, delegate: self)
+        sksTransaction = sksSession!.recognize(withType: SKTransactionSpeechTypeDictation,detection: .short, language: SKSLanguage, delegate: self)
         
         //Register
         DJISDKManager.registerApp(with: self)
@@ -96,6 +94,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             aircraft!.delegate = self
             aircraft!.flightController?.delegate = self
         }
+        //get current waypoint and put it into DJIMissionWaypoint
+        currentWayPoint()
         //beign listening to user and this gets called repeatedly to ensure countinue listening
         beginApp()
     }
@@ -294,7 +294,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 disableVirtualStickModeSaid()
             }
             //say "execute" to executeMission
-            if str == "start" {
+            if str == "execute" || str == "start" {
                 executeMission()
             }
             // say "cancel" to cancel mission
@@ -309,6 +309,11 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             if str == "resume" {
                 resumeMissionSaid()
             }
+            //say "back" to back to VoiceViewController
+            if str == "back" {
+                let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "VoiceViewController")
+                UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
+            }
         }
         if strArr.count > 1{
             //take off
@@ -316,35 +321,58 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 takeOff(fc)
             }
             //set boudary limit height and radius within 20m
-            if strArr[0] == "limit" && isNumber(stringToTest: strArr[1]) == true{
+            else if strArr[0] == "limit" && isNumber(stringToTest: strArr[1]) == true{
                 enableMaxFlightRadius(fc,dist: strArr[1])
             }
-            if (strArr[0] == "up" || strArr[0] == "down" || strArr[0] == "left" || strArr[0] == "right") && self.isStringAnDouble(string: strArr[1]) {
+            else if (strArr[0] == "up" || strArr[0] == "down" || strArr[0] == "left" || strArr[0] == "right") && self.isStringAnDouble(string: strArr[1]) {
                 direction = strArr[0]
                 distance = Double(strArr[1])
                 
                 //set to label
                 directionText.text = direction
-                distanceText.text = "\(distance)"
                 runLongCommands(dir: direction!, dist: distance!)
             }
             // say "goHome" to make the drone land
-            if strArr[0] == "go" {
+            else if strArr[0] == "go" {
                 if strArr[1] == "home"{
                     goHome(fc)
                 }
             }
+            else {
+                self.showAlertResult(info: "Command not found, say your next command!")
+            }
         }
-        else {
-            self.showAlertResult(info: "Command not found, say your next command!")
-        }
+        
     }
     func isStringAnDouble(string: String) -> Bool {
         return Double(string) != nil
     }
-    
+    var lat: Double = 0.0
+    var long: Double = 0.0
+    var droneLocation0: CLLocation? = nil
     //******** RUN COMMANDS METHODS **********//
-
+    func currentWayPoint(){
+        //get drone's location
+        guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
+            return
+        }
+        guard let droneLocationValue = DJISDKManager.keyManager()?.getValueFor(locationKey) else {
+            return
+        }
+        //convert CLLocation to CLLocationCoordinate2D
+         droneLocation0 = droneLocationValue.value as! CLLocation
+        self.droneLocation = droneLocation0?.coordinate
+        //self.droneLocation = currentState?.aircraftLocation?
+        
+        lat = droneLocation!.latitude
+        long = droneLocation!.longitude
+        
+        //add first waypoint
+        let loc1 = CLLocationCoordinate2DMake(lat, long)
+        currentWaypoint = DJIWaypoint(coordinate: loc1)
+        currentWaypoint?.altitude = Float((droneLocation0?.altitude)!)
+        self.waypointMission.add(currentWaypoint!)
+    }
     func runLongCommands(dir: String, dist: Double){
         //by here, we have each command being seperated into direction, distance, units
         // next steps are find location, distance and direction of drone
@@ -356,36 +384,16 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
         waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
         
-        //get drone's location
-        guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
-            return
-        }
-        guard let droneLocationValue = DJISDKManager.keyManager()?.getValueFor(locationKey) else {
-            return
-        }
-        //convert CLLocation to CLLocationCoordinate2D
-        let droneLocation0 = droneLocationValue.value as! CLLocation
-        self.droneLocation = droneLocation0.coordinate
-        //self.droneLocation = currentState?.aircraftLocation?
-        
-        var lat: Double = droneLocation!.latitude
-        var long: Double = droneLocation!.longitude
-        
-        //add first waypoint
-        let loc1 = CLLocationCoordinate2DMake(lat, long)
-        currentWaypoint = DJIWaypoint(coordinate: loc1)
-        currentWaypoint?.altitude = Float(droneLocation0.altitude)
-        self.waypointMission.add(currentWaypoint!)
         //if units are in meters
         //convert all unit to GPS coordinate points
         
         if dir == "up"{
             //long = long + convertMetersToPoint(m: dist)
-            ALTITUDE = Float(droneLocation0.altitude) + Float(dist)
+            ALTITUDE = Float((droneLocation0?.altitude)!) + Float(dist)
         }
         if dir == "down" {
             //long = long - convertMetersToPoint(m: dist)
-            ALTITUDE = Float(droneLocation0.altitude) - Float(dist)
+            ALTITUDE = Float((droneLocation0?.altitude)!) - Float(dist)
         }
         if dir == "right"{
             lat = lat + convertMetersToPointLat(m: dist)
@@ -398,18 +406,14 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         var commLoc: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
         commLoc.latitude = lat
         commLoc.longitude = long
-        positionLatText.text = "\(commLoc.latitude)"
-        positionLonText.text = "\(commLoc.longitude)"
         print("position now is " + String(describing: commLoc) )
         
         if CLLocationCoordinate2DIsValid(commLoc) {
             let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
             waypoint2.altitude = ALTITUDE
-             waypointList.append(waypoint2)
             self.waypointMission.add(waypoint2)
         }
-       
-        
+        //after adding all waypoint, user can call "start" to execute missions
     }
     
     //disable Virtual Stick Mode so you can use remote control
