@@ -162,6 +162,14 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             cancel()
         }
     }
+    @IBAction func loadRootView(_ sender: UIButton)
+    {
+        performSegue(withIdentifier: "PathsToRootSegue", sender: Any?.self)
+    }
+    @IBAction func loadVoiceView(_ sender: UIButton)
+    {
+        performSegue(withIdentifier: "PathsToVoiceSegue", sender: Any?.self)
+    }
     //refesh transaction and start listening
     @IBAction func refeshButton(_ sender: Any) {
         let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PredefinedPathViewController")

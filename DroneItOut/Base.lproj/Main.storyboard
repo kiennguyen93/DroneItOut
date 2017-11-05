@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_0" orientation="landscape">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13174"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -260,6 +260,7 @@
                         <outlet property="vsLabel" destination="dNl-C9-FhW" id="orv-FH-3a7"/>
                         <segue destination="bz9-sH-LbI" kind="presentation" identifier="FollowMeSegue" id="RL2-yZ-Gf0"/>
                         <segue destination="niB-1P-ogp" kind="presentation" identifier="VoiceSegue" id="0GB-7s-KOV"/>
+                        <segue destination="GWO-5r-AQ2" kind="presentation" identifier="RootToPathsSegue" id="13h-hS-Y8w"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -495,6 +496,15 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="W6k-9r-9Gg">
+                                <rect key="frame" x="360" y="110" width="148" height="36"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <state key="normal" title="Predefined Paths"/>
+                                <connections>
+                                    <action selector="loadPredefinedPathsView:" destination="niB-1P-ogp" eventType="touchUpInside" id="0pp-S6-vqO"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -565,6 +575,7 @@
                         <outlet property="stateText" destination="2e4-9i-bGd" id="Hny-Ub-deA"/>
                         <outlet property="unitText" destination="h3W-p3-KAb" id="zQt-sE-AfE"/>
                         <segue destination="BYZ-38-t0r" kind="presentation" identifier="VoiceToRootViewSegue" id="8u4-Rm-oQH"/>
+                        <segue destination="GWO-5r-AQ2" kind="presentation" identifier="VoiceToPathsSegue" id="Bzt-de-JEQ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lJb-Or-FNy" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -707,6 +718,24 @@
                                     <action selector="refeshButton:" destination="GWO-5r-AQ2" eventType="touchUpInside" id="HTM-iY-VVO"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dZp-n9-24p">
+                                <rect key="frame" x="386" y="101" width="59" height="36"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <state key="normal" title="Home"/>
+                                <connections>
+                                    <action selector="loadRootView:" destination="GWO-5r-AQ2" eventType="touchUpInside" id="a29-fP-Kcc"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="blv-ZQ-G6w">
+                                <rect key="frame" x="339" y="175" width="153" height="36"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                <state key="normal" title="Voice Commands"/>
+                                <connections>
+                                    <action selector="loadVoiceView:" destination="GWO-5r-AQ2" eventType="touchUpInside" id="Ahy-Fl-Xgo"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
@@ -726,14 +755,18 @@
                         <outlet property="positionLonText" destination="xha-BZ-T2R" id="f8v-Vx-ZLH"/>
                         <outlet property="recognitionText" destination="4o4-e5-jfV" id="PdQ-e5-Nqj"/>
                         <outlet property="stateText" destination="Efk-oI-9ia" id="wFa-ut-Hvy"/>
+                        <segue destination="niB-1P-ogp" kind="presentation" identifier="PathsToVoiceSegue" id="NFm-o1-YKB"/>
+                        <segue destination="BYZ-38-t0r" kind="presentation" identifier="PathsToRootSegue" id="OFc-vI-XBJ"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RhD-Br-Jtk" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="863.02816901408448" y="-1462.5"/>
+            <point key="canvasLocation" x="235" y="-435"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="8u4-Rm-oQH"/>
+        <segue reference="13h-hS-Y8w"/>
+        <segue reference="0GB-7s-KOV"/>
+        <segue reference="OFc-vI-XBJ"/>
     </inferredMetricsTieBreakers>
 </document>

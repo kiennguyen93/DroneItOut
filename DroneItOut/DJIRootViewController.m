@@ -112,7 +112,7 @@
     }
     else if([cell.textLabel.text isEqualToString:@"Predefined"])
     {
-        [self performSegueWithIdentifier:@"PredefinedPathSegue" sender:self];
+        [self performSegueWithIdentifier:@"RootToPathsSegue" sender:self];
     }
 }
 - (IBAction)btnAction:(id)sender{

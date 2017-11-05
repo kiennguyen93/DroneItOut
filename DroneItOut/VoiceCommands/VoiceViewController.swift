@@ -106,6 +106,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     @IBOutlet weak var stateText: UILabel!
     
     @IBOutlet weak var predefinedButton: UIButton!
+    @IBAction func loadPredefinedPathsView(_ sender: UIButton)
+    {
+        performSegue(withIdentifier: "VoiceToPathsSegue", sender: Any?.self)
+    }
     @IBAction func loadRootView(_ sender: UIButton)
     {
         performSegue(withIdentifier: "VoiceToRootViewSegue", sender: Any?.self)
