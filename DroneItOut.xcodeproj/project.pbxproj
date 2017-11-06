@@ -11,7 +11,6 @@
 		9718164E1FAE4D0B00624A8A /* PredefinedPathViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9718164D1FAE4D0B00624A8A /* PredefinedPathViewController.swift */; };
 		976B61881F8C581B00CFDCD9 /* DJIBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */; };
 		976B618A1F8C58F800CFDCD9 /* DJICustomMission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */; };
-		979F8FDF1F73982800FC0477 /* simulator in Resources */ = {isa = PBXBuildFile; fileRef = 979F8FDE1F73982800FC0477 /* simulator */; };
 		A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A06F1B4BC22400129605 /* DJIRootViewController.m */; };
 		A402A0741B4BC43800129605 /* DJIMapController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0721B4BC43800129605 /* DJIMapController.m */; };
 		A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0771B4BDAE400129605 /* DJIAircraftAnnotation.m */; };
@@ -37,7 +36,6 @@
 		9718164D1FAE4D0B00624A8A /* PredefinedPathViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredefinedPathViewController.swift; sourceTree = "<group>"; };
 		976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJIBaseViewController.swift; sourceTree = "<group>"; };
 		976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJICustomMission.swift; sourceTree = "<group>"; };
-		979F8FDE1F73982800FC0477 /* simulator */ = {isa = PBXFileReference; lastKnownFileType = folder; path = simulator; sourceTree = "<group>"; };
 		A402A06E1B4BC22400129605 /* DJIRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIRootViewController.h; sourceTree = "<group>"; };
 		A402A06F1B4BC22400129605 /* DJIRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DJIRootViewController.m; sourceTree = "<group>"; };
 		A402A0711B4BC43800129605 /* DJIMapController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIMapController.h; sourceTree = "<group>"; };
@@ -138,7 +136,6 @@
 		A4E86B741B4A374300F204DA /* DroneItOut */ = {
 			isa = PBXGroup;
 			children = (
-				979F8FDE1F73982800FC0477 /* simulator */,
 				A44305471DA88CF3009C1370 /* DroneItOut.entitlements */,
 				A402A06E1B4BC22400129605 /* DJIRootViewController.h */,
 				A402A06F1B4BC22400129605 /* DJIRootViewController.m */,
@@ -274,7 +271,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A4E86B811B4A374300F204DA /* Main.storyboard in Resources */,
-				979F8FDF1F73982800FC0477 /* simulator in Resources */,
 				A4507F2C1CB506D40037861C /* DJIWaypointConfigViewController.xib in Resources */,
 				A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */,
 				A4507F2A1CB506D40037861C /* DJIGSButtonViewController.xib in Resources */,

@@ -15,7 +15,8 @@ import SpriteKit
 import CoreLocation
 import CoreBluetooth
 class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTransactionDelegate, DJIFlightControllerDelegate, CLLocationManagerDelegate{
-  
+    // Does not break
+    
     var appDelegate = UIApplication.shared.delegate
     //display whether the drone is connected or not
     @IBOutlet weak var connectionStatus: UILabel!
@@ -67,6 +68,14 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        let voiceViewController = VoiceViewController()
+        let djiRootViewController = DJIRootViewController()
+        voiceViewController.dismiss(animated: true)
+        djiRootViewController.dismiss(animated: true)
+        //get current waypoint and put it into DJIMissionWaypoint
+        currentWayPoint()
+        disableVirtualStickModeSaid()
+        waypointMission.removeAllWaypoints()
         
         // my nuance sandbox credentials
         let SKSAppKey = "e44c885455471dd09b1cef28fae758e80348e989db7b28e4b794a9608cfbfb714783c59dcae26d66fe5c8ef843e7e0462fc9cf0a44f7eefc8b985c18935789da";         //start a session
@@ -78,10 +87,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         
         // start nuance session with my account
         sksSession = SKSession(url: URL(string: SKSServerUrl), appToken: SKSAppKey)
-        //sksTransaction = nil
-        
-        sksTransaction = sksSession!.recognize(withType: SKTransactionSpeechTypeDictation,detection: .short, language: SKSLanguage, delegate: self)
-        
+     
         //Register
         DJISDKManager.registerApp(with: self)
         
@@ -94,8 +100,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             aircraft!.delegate = self
             aircraft!.flightController?.delegate = self
         }
-        //get current waypoint and put it into DJIMissionWaypoint
-        currentWayPoint()
+        
         //beign listening to user and this gets called repeatedly to ensure countinue listening
         beginApp()
     }
@@ -121,6 +126,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     }
     override func viewDidDisappear(_ animated: Bool) {
         DJISDKManager.keyManager()?.stopAllListening(ofListeners: self)
+        sksTransaction?.cancel()
+        sksTransaction?.stopRecording()
     }
     func checkProductConnected() {
         //Display conneciton status
@@ -180,7 +187,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         let options = [
             "" : ""
         ]
-        sksTransaction = sksSession?.recognize(withType: SKTransactionSpeechTypeDictation, detection: .long, language: "eng-USA", options: options, delegate: self)
+        sksTransaction = sksSession?.recognize(withType: SKTransactionSpeechTypeDictation, detection: .short, language: "eng-USA", options: options, delegate: self)
         print("starting reconition process")
     }
     func stopRecording(){
@@ -212,7 +219,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         stateText.text = "Idle"
         sksTransaction = nil
         print("reset transaction")
-        //beginApp()
+        beginApp()
     }
     private func transaction(_ transaction: SKTransaction!, didFailWithError error: NSError!, suggestion: String!) {
         print("there is an error in processing speech transaction")
@@ -227,23 +234,20 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     }
     // *************This is where the action happens after speech has been reconized!*********** //
     func transaction(_ transaction: SKTransaction!, didReceive recognition: SKRecognition!) {
-        
-        state = .sksIdle
-        stateText.text = "Idle"
+   
         //convert all text to lowercase
         
         //make an array of word said
         var words = recognition.text.lowercased()
         strArr = words.characters.split{$0 == " "}.map(String.init)
+        state = .sksIdle
+        stateText.text = "Idle"
         
-        if strArr[0] == "goal" {
-            strArr[0] = "go"
-        }
-        if strArr[0] == "alright" {
-            strArr[0] = "go"
-            strArr.append("right")
+        if strArr[0] == "ride" {
+            strArr[0] = "right"
         }
         if strArr.count == 2 || strArr.count == 3{
+            
             if strArr[0] == "call" {
                 strArr[0] = "go"
             }
@@ -252,6 +256,30 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             }
             if strArr[1] == "let" {
                 strArr[1] = "left"
+            }
+            switch strArr[1] {
+            case "one":
+                strArr[1] = "1"
+            case "two":
+                strArr[1] = "2"
+            case "three":
+                strArr[1] = "3"
+            case "four":
+                strArr[1] = "4"
+            case "five":
+                strArr[1] = "5"
+            case "six":
+                strArr[1] = "6"
+            case "seven":
+                strArr[1] = "7"
+            case "eight":
+                strArr[1] = "8"
+            case "nine":
+                strArr[1] = "9"
+            case "ten":
+                strArr[1] = "10"
+            default:
+                break
             }
         }
         if strArr.count == 3 { // go for work
@@ -277,15 +305,6 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         recognitionText.text = joinwords
         print("recognition recieved: \(recognition.text)")
         print("state: \(state)")
-        
-        //nuance catches 1 as "one", so we need to change it
-        if #available(iOS 9.0, *) {
-            if words.localizedStandardRange(of: "one") != nil {
-                words = words.replacingOccurrences(of: "one", with: "1")
-            }
-        } else {
-            // Fallback on earlier versions
-        }
         
         // set and ensure fc is flight controller
         let fc = (DJISDKManager.product() as! DJIAircraft).flightController
@@ -321,6 +340,9 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             if str == "back" {
                 let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "VoiceViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
+            }
+            if str == "predefined"{
+                predefinedPath()
             }
         }
         if strArr.count > 1{
@@ -368,7 +390,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             return
         }
         //convert CLLocation to CLLocationCoordinate2D
-         droneLocation0 = droneLocationValue.value as! CLLocation
+        droneLocation0 = droneLocationValue.value as? CLLocation
         self.droneLocation = droneLocation0?.coordinate
         //self.droneLocation = currentState?.aircraftLocation?
         
@@ -381,17 +403,42 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         currentWaypoint?.altitude = Float((droneLocation0?.altitude)!)
         self.waypointMission.add(currentWaypoint!)
     }
+    func predefinedPath() {
+        //add second waypoint
+        let loc2 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint2 = DJIWaypoint(coordinate: loc2)
+        wpoint2.altitude = Float((droneLocation0?.altitude)!) + 2
+        self.waypointMission.add(wpoint2)
+        
+        //add third waypoint
+        let loc3 = CLLocationCoordinate2DMake(lat+1, long)
+        let wpoint3 = DJIWaypoint(coordinate: loc3)
+        wpoint3.altitude =  wpoint2.altitude
+        self.waypointMission.add(wpoint3)
+        
+        //add 4th waypoint
+        let loc4 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint4 = DJIWaypoint(coordinate: loc4)
+        wpoint4.altitude =  (currentWaypoint?.altitude)! - 2
+        self.waypointMission.add(wpoint4)
+        
+        //add 5th waypoint
+        let loc5 = CLLocationCoordinate2DMake(lat+1, long)
+        let wpoint5 = DJIWaypoint(coordinate: loc5)
+        wpoint5.altitude =  wpoint2.altitude
+        self.waypointMission.add(wpoint5)
+        
+        //add 6th waypoint
+        let loc6 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint6 = DJIWaypoint(coordinate: loc6)
+        wpoint6.altitude =  (currentWaypoint?.altitude)! - 2
+        self.waypointMission.add(wpoint6)
+        executeMission()
+    }
     func runLongCommands(dir: String, dist: Double){
         //by here, we have each command being seperated into direction, distance, units
         // next steps are find location, distance and direction of drone
-        
-        // 5 mission paramenter always needed
-        self.waypointMission.maxFlightSpeed = 2
-        self.waypointMission.autoFlightSpeed = 1
-        self.waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
-        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
-        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
-        
+ 
         //if units are in meters
         //convert all unit to GPS coordinate points
         
@@ -473,7 +520,15 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         })
     }
     func executeMission(){
+        
         //prepare mission
+        // 5 mission paramenter always needed
+        self.waypointMission.maxFlightSpeed = 2
+        self.waypointMission.autoFlightSpeed = 1
+        self.waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
+        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
+        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
+        
         prepareMission(missionName: self.waypointMission)
     }
     func prepareMission(missionName: DJIWaypointMission){

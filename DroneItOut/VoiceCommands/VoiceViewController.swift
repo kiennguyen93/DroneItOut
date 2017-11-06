@@ -130,7 +130,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         sksSession = SKSession(url: URL(string: SKSServerUrl), appToken: SKSAppKey)
         //sksTransaction = nil
         
-        sksTransaction = sksSession!.recognize(withType: SKTransactionSpeechTypeDictation,detection: .short, language: SKSLanguage, delegate: self)
+       // sksTransaction = sksSession!.recognize(withType: SKTransactionSpeechTypeDictation,detection: .short, language: SKSLanguage, delegate: self)
         
         //Register
         DJISDKManager.registerApp(with: self)
@@ -139,12 +139,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         DJISDKManager.product()
         checkProductConnected()
         ConnectedProductManager.sharedInstance.fetchAirLink()
-        
-        //mission manner
-        //self.missionManager = DJIMissionControl.activeTrackMissionOperator(DJIMissionControl)()!
-        //self.missionManager!.delegate = self
-        // Setup the flight controller delegate
-        
+      
         let aircraft: DJIAircraft? = self.fetchAircraft()
         if aircraft != nil {
             aircraft!.delegate = self
@@ -152,7 +147,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         }
         
         missionStatusBar.setProgress(0, animated: true)
-        
         //beign listening to user and this gets called repeatedly to ensure countinue listening
         beginApp()
         
@@ -181,6 +175,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     override func viewDidDisappear(_ animated: Bool) {
         DJISDKManager.keyManager()?.stopAllListening(ofListeners: self)
+        sksTransaction?.cancel()
+        sksTransaction?.stopRecording()
     }
     func checkProductConnected() {
         
@@ -242,9 +238,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         let options = [
             "" : ""
         ]
-        sksTransaction = sksSession?.recognize(withType: SKTransactionSpeechTypeDictation, detection: .long, language: "eng-USA", options: options, delegate: self)
+        sksTransaction = sksSession?.recognize(withType: SKTransactionSpeechTypeDictation, detection: .short, language: "eng-USA", options: options, delegate: self)
         print("starting reconition process")
-        
     }
     
     func stopRecording(){
@@ -296,16 +291,18 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     // *************This is where the action happens after speech has been reconized!*********** //
     func transaction(_ transaction: SKTransaction!, didReceive recognition: SKRecognition!) {
         
-        state = .sksIdle
-        stateText.text = "Idle"
+        
         //convert all text to lowercase
-        
-        
-        
+     
         //make an array of word said
         var words = recognition.text.lowercased()
+        if words == "check off" {
+            words = "take off"
+        }
+        if words == "Brady fight" || words == "Brady find"{
+            words = "predefined"
+        }
         strArr = words.characters.split{$0 == " "}.map(String.init)
-        
         
         if strArr[0] == "goal" {
             strArr[0] = "go"
@@ -317,7 +314,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         if strArr[0] == "redefine" || strArr[0] == "redefined" || strArr[0] == "predefine"{
             strArr[0] = "predefined"
         }
-        if strArr.count == 2 || strArr.count == 3{
+        if strArr.count == 2{
             if strArr[0] == "call" {
                 strArr[0] = "go"
             }
@@ -335,23 +332,33 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             if strArr[2] == "to" || strArr[2] == "by" || strArr[2] == "for" {
                 strArr.remove(at: 2)
             }
+            if strArr[1] == "ride" {
+                strArr[1] = "right"
+            }
             if strArr[1] == "for" && strArr[2] == "work" {
-                
                 strArr[1] = "forward"
                 strArr.remove(at: strArr.index(of: "work")!)
-
             }
             if strArr[1] == "back" && strArr[2] == "work" {
                 strArr[1] = "backward"
                 strArr.remove(at: strArr.index(of: "work")!)
             }
-            
+        }
+        if strArr.count == 4 {
+            if strArr[1] == "ride" {
+                strArr[1] = "right"
+            }
+            if strArr[1] == "let" {
+                strArr[1] = "left"
+            }
         }
        
         let joinwords = strArr.joined(separator: " ")
         recognitionText.text = joinwords
         print("recognition recieved: \(recognition.text)")
         print("state: \(state)")
+        state = .sksIdle
+        stateText.text = "Idle"
         
         //nuance catches 1 as "one", so we need to change it
         if #available(iOS 9.0, *) {
@@ -402,9 +409,13 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
             //say "predefined" to predefine paths
             if str == "predefined" {
+                predefinedPath()
+                /*
+                transaction.cancel()
+                transaction.stopRecording()
                 let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PredefinedPathViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
-
+                 */
             }
         }
         if strArr.count > 1 && strArr.count < 3{
@@ -555,12 +566,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     
     func enterVirtualStickMode( newFlightCtrlData: DJIVirtualStickFlightControlData) {
-        // x, y , z = forward, right, downward
-        
         //cancel the missions just in case they are running
         //stopWaypointMissioin()
         
-        //aircraft = self.fetchAircraft()
         fc = self.fetchFlightController()
         fc?.delegate = self
         
@@ -589,8 +597,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                     flightCtrlData.verticalThrottle = newFlightCtrlData.verticalThrottle
                     
                     //if VirtualStickControlMode is available, the data will be sent and drone will perfom command
-                    if (self.fc?.isVirtualStickControlModeAvailable())! {
-                        self.directionText.text = "Virtual stick control is available"
+                    //if (self.fc?.isVirtualStickControlModeAvailable())! {
                         self.fc?.send(flightCtrlData, withCompletion: {(error: Error?) -> Void in
                             if error != nil {
                                 self.VSMText.text = "could not send data: \(String(describing: error))"
@@ -599,11 +606,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                                 self.VSMText.text = "Data was sent"
                             }
                         })
-                    }
-                    else {
-                        self.VSMText.text = "VSC mode is unavailable"
-                    }
-                    
+                    //}
+                   // else {
+                    //    self.VSMText.text = "VSC mode is unavailable"
+                   // }
                 }
             })
         }
@@ -636,25 +642,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         let droneLocation0 = droneLocationValue.value as! CLLocation
         self.droneLocation = droneLocation0.coordinate
         //self.droneLocation = currentState?.aircraftLocation?
-        
-        //second way to get drone location
-        /*
-         guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
-         NSLog("Couldn't create the key")
-         return
-         }
-         guard let keyManager = DJISDKManager.keyManager() else {
-         print("Couldn't get the keyManager")
-         // This will happen if not registered
-         return
-         }
-         keyManager.startListeningForChanges(on: locationKey, withListener: self) { (oldValue, newValue) in
-         if newValue != nil {
-         location0 = newValue!.value as! CLLocation
-         self.droneLocation = location0.coordinate
-         }
-         }
-         */
+
         var lat: Double = droneLocation!.latitude
         var long: Double = droneLocation!.longitude
         
@@ -733,6 +721,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             else {
                 self.showAlertResult(info: "Start mission succesfully")
                 print("Start Mission sucess")
+                missionOperator?.removeAllListeners()
             }
         }
         missionOperator?.load(missionName)
@@ -754,15 +743,149 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         missionOperator?.uploadMission(completion: didMissionUpload)
         
     }
+    func predefinedPath() {
+        disableVirtualStickModeSaid()
+        // cancelMissionSaid()
+        self.waypointMission.removeAllWaypoints()
+        waypointMission = DJIMutableWaypointMission()
+        
+        
+        // 5 mission paramenter always needed
+        waypointMission.maxFlightSpeed = 2
+        waypointMission.autoFlightSpeed = 1
+        waypointMission.headingMode = .auto
+        waypointMission.rotateGimbalPitch = true
+        waypointMission.flightPathMode = .normal
+        waypointMission.finishedAction = .noAction
+        waypointMission.gotoFirstWaypointMode = .pointToPoint
+        
+        //get drone's location
+        guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
+            return
+        }
+        guard let droneLocationValue = DJISDKManager.keyManager()?.getValueFor(locationKey) else {
+            return
+        }
+        
+        //convert CLLocation to CLLocationCoordinate2D
+        let droneLocation0 = droneLocationValue.value as! CLLocation
+        let droneLocation = droneLocation0.coordinate
+        //self.droneLocation = currentState?.aircraftLocation?
+        
+        var lat: Double = droneLocation.latitude
+        var long: Double = droneLocation.longitude
+        
+        waypointMission.pointOfInterest = droneLocation
+        let offset = 0.0000899322
+        
+        let loc1 = CLLocationCoordinate2DMake(lat, long)
+        let currentWaypoint = DJIWaypoint(coordinate: loc1)
+        currentWaypoint.altitude = Float(droneLocation0.altitude)
+        currentWaypoint.heading = 0
+        currentWaypoint.actionTimeoutInSeconds = 60
+        currentWaypoint.cornerRadiusInMeters = 5
+        currentWaypoint.turnMode = .clockwise
+        currentWaypoint.gimbalPitch = 0
+        
+        
+        //add second waypoint
+        let loc2 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint2 = DJIWaypoint(coordinate: loc2)
+        wpoint2.altitude = Float((droneLocation0.altitude) + 2)
+        wpoint2.heading = 0
+        wpoint2.actionTimeoutInSeconds = 60
+        wpoint2.cornerRadiusInMeters = 5
+        wpoint2.turnMode = .clockwise
+        wpoint2.gimbalPitch = 0
+        
+        
+        //add third waypoint
+        let loc3 = CLLocationCoordinate2DMake(lat + myPointOffset, long)
+        let wpoint3 = DJIWaypoint(coordinate: loc3)
+        wpoint3.altitude =  wpoint2.altitude
+        wpoint3.heading = 0
+        wpoint3.actionTimeoutInSeconds = 60
+        wpoint3.cornerRadiusInMeters = 5
+        wpoint3.turnMode = .clockwise
+        wpoint3.gimbalPitch = -90
+        
+        
+        //add 4th waypoint
+        let loc4 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint4 = DJIWaypoint(coordinate: loc4)
+        wpoint4.altitude =  (currentWaypoint.altitude) - 2
+        wpoint4.heading = 0
+        wpoint4.actionTimeoutInSeconds = 60
+        wpoint4.cornerRadiusInMeters = 5
+        wpoint4.turnMode = .clockwise
+        wpoint4.gimbalPitch = 0
+        
+        
+        //add 5th waypoint
+        let loc5 = CLLocationCoordinate2DMake(lat + myPointOffset, long)
+        let wpoint5 = DJIWaypoint(coordinate: loc5)
+        wpoint5.altitude =  wpoint2.altitude
+        wpoint5.heading = 0
+        wpoint5.actionTimeoutInSeconds = 60
+        wpoint5.cornerRadiusInMeters = 5
+        wpoint5.turnMode = .clockwise
+        wpoint5.gimbalPitch = -90
+  
+        //add 6th waypoint
+        let loc6 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint6 = DJIWaypoint(coordinate: loc6)
+        wpoint6.altitude =  (currentWaypoint.altitude) + 2
+        wpoint6.heading = 0
+        wpoint6.actionTimeoutInSeconds = 60
+        wpoint6.cornerRadiusInMeters = 5
+        wpoint6.turnMode = .clockwise
+        wpoint6.gimbalPitch = 0
+        
+        //add 7th waypoint
+        let loc7 = CLLocationCoordinate2DMake(lat + myPointOffset, long)
+        let wpoint7 = DJIWaypoint(coordinate: loc7)
+        wpoint7.altitude = wpoint2.altitude
+        wpoint7.heading = 0
+        wpoint7.actionTimeoutInSeconds = 60
+        wpoint7.cornerRadiusInMeters = 5
+        wpoint7.turnMode = .clockwise
+        wpoint7.gimbalPitch = -90
+        
+        //add 8th waypoint
+        let loc8 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint8 = DJIWaypoint(coordinate: loc8)
+        wpoint8.altitude =  (currentWaypoint.altitude) - 2
+        wpoint8.heading = 0
+        wpoint8.actionRepeatTimes = 1
+        wpoint8.actionTimeoutInSeconds = 60
+        wpoint8.cornerRadiusInMeters = 5
+        wpoint8.turnMode = .clockwise
+        wpoint8.gimbalPitch = 0
+        
+        //add waypoints to mission
+        waypointMission.add(currentWaypoint)
+        waypointMission.add(wpoint2)
+        waypointMission.add(wpoint3)
+        waypointMission.add(wpoint4)
+        waypointMission.add(wpoint5)
+        waypointMission.add(wpoint6)
+        waypointMission.add(wpoint7)
+        waypointMission.add(wpoint8)
+        
+        //prepareMission before execute
+        prepareMission(missionName: waypointMission)
+    }
     //when virtual stick mode is enabled, user can't control aircraft by remote control
     func enableVirtualStickModeSaid() {
         //replace enableVirtualStickControlMode to setVirtualStickModeEnabled
         fc?.setVirtualStickModeEnabled(true, withCompletion: { (error: Error?) in
             if error != nil {
                 self.VSMText.text = "virtual stick mode not enabled: \(String(describing: error))"
+                print("VSM: \(String(describing: error))")
             }
             else {
                 self.VSMText.text = "virtual stick mode enabled"
+                print("VSM: enable")
                 //missing some codes
                 //initalize a data object. They have pitch, roll, yaw, and throttle
                 var commandCtrlData: DJIVirtualStickFlightControlData? = DJIVirtualStickFlightControlData.init()
