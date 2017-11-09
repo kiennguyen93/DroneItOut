@@ -39,7 +39,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     let myPointOffset: Double = 0.0000181
     var ALTITUDE: Float = 2
     var distance: Double?
-    var direction: String?
+    var direction: String = ""
     var strArr: [String] = []
     var d: Int = 0
     
@@ -486,14 +486,16 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             default:
                 break
             }
-            if (!(direction?.isEmpty)! && self.isStringAnDouble(string: strArr[0])){
+            if(direction.isEmpty){
+                print("skip")
+            }
+            else if self.isStringAnDouble(string: strArr[0]) {
                 distance = Double(strArr[0])
                 //set to label
-                distanceText.text = "\(distance)"
+                distanceText.text = "\(String(describing: distance))"
                 orderText.text = "2"
-                runLongCommands(dir: direction!, dist: distance!)
+                runLongCommands(dir: direction, dist: distance!)
             }
-            
         }
             //Exmple: Go north 5 m, or go up 5 ,
         else if strArr.count > 2{
@@ -509,7 +511,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 distanceText.text = "\(distance)"
                 orderText.text = "2"
                 
-                runLongCommands(dir: direction!, dist: distance!)
+                runLongCommands(dir: direction, dist: distance!)
             }
            //set boudary limit height and radius within 20m
             else if  strArr[0] == "limit" && isNumber(stringToTest: strArr[1]) == true && strArr[2] == "m"{
