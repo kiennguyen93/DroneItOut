@@ -11,6 +11,7 @@
 		9718164E1FAE4D0B00624A8A /* PredefinedPathViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9718164D1FAE4D0B00624A8A /* PredefinedPathViewController.swift */; };
 		976B61881F8C581B00CFDCD9 /* DJIBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */; };
 		976B618A1F8C58F800CFDCD9 /* DJICustomMission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */; };
+		97EEBE711FB433EF00AF7B1D /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97EEBE701FB433EF00AF7B1D /* Images.xcassets */; };
 		A402A0701B4BC22400129605 /* DJIRootViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A06F1B4BC22400129605 /* DJIRootViewController.m */; };
 		A402A0741B4BC43800129605 /* DJIMapController.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0721B4BC43800129605 /* DJIMapController.m */; };
 		A402A07A1B4BDAE400129605 /* DJIAircraftAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = A402A0771B4BDAE400129605 /* DJIAircraftAnnotation.m */; };
@@ -23,7 +24,6 @@
 		A4E86B781B4A374300F204DA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A4E86B771B4A374300F204DA /* main.m */; };
 		A4E86B7B1B4A374300F204DA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A4E86B7A1B4A374300F204DA /* AppDelegate.m */; };
 		A4E86B811B4A374300F204DA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A4E86B7F1B4A374300F204DA /* Main.storyboard */; };
-		A4E86B831B4A374300F204DA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A4E86B821B4A374300F204DA /* Images.xcassets */; };
 		A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A4E86B841B4A374300F204DA /* LaunchScreen.xib */; };
 		A4F9574C1B4ADD570017733D /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4F9574B1B4ADD570017733D /* MapKit.framework */; };
 		EF27F7011F8C0DEF00DA83B7 /* VoiceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF27F7001F8C0DEF00DA83B7 /* VoiceViewController.swift */; };
@@ -36,6 +36,7 @@
 		9718164D1FAE4D0B00624A8A /* PredefinedPathViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredefinedPathViewController.swift; sourceTree = "<group>"; };
 		976B61871F8C581B00CFDCD9 /* DJIBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJIBaseViewController.swift; sourceTree = "<group>"; };
 		976B61891F8C58F800CFDCD9 /* DJICustomMission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DJICustomMission.swift; sourceTree = "<group>"; };
+		97EEBE701FB433EF00AF7B1D /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = DroneItOut/Images.xcassets; sourceTree = SOURCE_ROOT; };
 		A402A06E1B4BC22400129605 /* DJIRootViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIRootViewController.h; sourceTree = "<group>"; };
 		A402A06F1B4BC22400129605 /* DJIRootViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DJIRootViewController.m; sourceTree = "<group>"; };
 		A402A0711B4BC43800129605 /* DJIMapController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DJIMapController.h; sourceTree = "<group>"; };
@@ -59,7 +60,6 @@
 		A4E86B791B4A374300F204DA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		A4E86B7A1B4A374300F204DA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		A4E86B801B4A374300F204DA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		A4E86B821B4A374300F204DA /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		A4E86B851B4A374300F204DA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		A4E86B901B4A374300F204DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A4E86B911B4A374300F204DA /* GSDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GSDemoTests.m; sourceTree = "<group>"; };
@@ -157,8 +157,8 @@
 				A4507F281CB506D40037861C /* DJIWaypointConfigViewController.xib */,
 				A4E86B7F1B4A374300F204DA /* Main.storyboard */,
 				976B61861F8C578900CFDCD9 /* VoiceCommands */,
-				A4E86B821B4A374300F204DA /* Images.xcassets */,
 				A4E86B841B4A374300F204DA /* LaunchScreen.xib */,
+				97EEBE701FB433EF00AF7B1D /* Images.xcassets */,
 				A4507F2D1CB506F20037861C /* DemoUtility */,
 				A4E86B751B4A374300F204DA /* Supporting Files */,
 				EF27F6FF1F8C0DEE00DA83B7 /* DroneItOut-Bridging-Header.h */,
@@ -271,10 +271,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				A4E86B811B4A374300F204DA /* Main.storyboard in Resources */,
+				97EEBE711FB433EF00AF7B1D /* Images.xcassets in Resources */,
 				A4507F2C1CB506D40037861C /* DJIWaypointConfigViewController.xib in Resources */,
 				A4E86B861B4A374300F204DA /* LaunchScreen.xib in Resources */,
 				A4507F2A1CB506D40037861C /* DJIGSButtonViewController.xib in Resources */,
-				A4E86B831B4A374300F204DA /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -29,6 +29,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     var direction: String?
     var strArr: [String] = []
     var d: Int = 0
+    //Calculation 1m = GPS point - 0.000284
+    let myPointOffset: Double = 0.0000181
     
     //SpeechKit variable
     var sksSession: SKSession?
@@ -73,9 +75,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         voiceViewController.dismiss(animated: true)
         djiRootViewController.dismiss(animated: true)
         //get current waypoint and put it into DJIMissionWaypoint
-        currentWayPoint()
-        disableVirtualStickModeSaid()
-        waypointMission.removeAllWaypoints()
+        firstWaypoint()
         
         // my nuance sandbox credentials
         let SKSAppKey = "e44c885455471dd09b1cef28fae758e80348e989db7b28e4b794a9608cfbfb714783c59dcae26d66fe5c8ef843e7e0462fc9cf0a44f7eefc8b985c18935789da";         //start a session
@@ -246,21 +246,17 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         if strArr[0] == "ride" {
             strArr[0] = "right"
         }
+        if strArr[0] == "stock" {
+            strArr[0] = "start"
+        }
         if strArr.count == 2 || strArr.count == 3{
-            
-            if strArr[0] == "call" {
-                strArr[0] = "go"
-            }
-            if strArr[1] == "ride" {
-                strArr[1] = "right"
-            }
-            if strArr[1] == "let" {
-                strArr[1] = "left"
-            }
+         
             switch strArr[1] {
             case "one":
                 strArr[1] = "1"
             case "two":
+                strArr[1] = "2"
+            case "to":
                 strArr[1] = "2"
             case "three":
                 strArr[1] = "3"
@@ -282,24 +278,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 break
             }
         }
-        if strArr.count == 3 { // go for work
-            if strArr[0] == "call" {
-                strArr[0] = "go"
-            }
-            if strArr[2] == "to" || strArr[2] == "by" || strArr[2] == "for" {
-                strArr.remove(at: 2)
-            }
-            if strArr[1] == "for" && strArr[2] == "work" {
-                
-                strArr[1] = "forward"
-                strArr.remove(at: strArr.index(of: "work")!)
-                
-            }
-            if strArr[1] == "back" && strArr[2] == "work" {
-                strArr[1] = "backward"
-                strArr.remove(at: strArr.index(of: "work")!)
-            }
-        }
+        
+        
         
         let joinwords = strArr.joined(separator: " ")
         recognitionText.text = joinwords
@@ -336,14 +316,19 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             if str == "resume" {
                 resumeMissionSaid()
             }
+            //say "remove to remove all listeners
+            if str == "remove" {
+                missionOperator?.removeAllListeners()
+            }
+            if str == "again" {
+                
+            }
             //say "back" to back to VoiceViewController
-            if str == "back" {
-                let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "VoiceViewController")
+            if str == "homepage" {
+                let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DJIRootViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
             }
-            if str == "predefined"{
-                predefinedPath()
-            }
+
         }
         if strArr.count > 1{
             //take off
@@ -362,11 +347,9 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 directionText.text = direction
                 runLongCommands(dir: direction!, dist: distance!)
             }
-            // say "goHome" to make the drone land
-            else if strArr[0] == "go" {
-                if strArr[1] == "home"{
-                    goHome(fc)
-                }
+            else if (strArr[0] == "voice" && (strArr[1] == "commands" || strArr[1] == "commands")){
+                let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "VoiceViewController")
+                UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
             }
             else {
                 self.showAlertResult(info: "Command not found, say your next command!")
@@ -379,9 +362,23 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     }
     var lat: Double = 0.0
     var long: Double = 0.0
-    var droneLocation0: CLLocation? = nil
     //******** RUN COMMANDS METHODS **********//
-    func currentWayPoint(){
+   
+    func firstWaypoint(){
+        disableVirtualStickModeSaid()
+        // cancelMissionSaid()
+        self.waypointMission.removeAllWaypoints()
+        waypointMission = DJIMutableWaypointMission()
+        
+        // 5 mission paramenter always needed
+        waypointMission.maxFlightSpeed = 2
+        waypointMission.autoFlightSpeed = 1
+        waypointMission.headingMode = .auto
+        waypointMission.rotateGimbalPitch = true
+        waypointMission.flightPathMode = .normal
+        waypointMission.finishedAction = .noAction
+        waypointMission.gotoFirstWaypointMode = .pointToPoint
+        
         //get drone's location
         guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
             return
@@ -390,65 +387,42 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             return
         }
         //convert CLLocation to CLLocationCoordinate2D
-        droneLocation0 = droneLocationValue.value as? CLLocation
-        self.droneLocation = droneLocation0?.coordinate
-        //self.droneLocation = currentState?.aircraftLocation?
+        let droneLocation0 = droneLocationValue.value as! CLLocation
+       
+        //set drone locatoin to a gobal variable to use it later
+        droneFirstLocation = droneLocation0
         
-        lat = droneLocation!.latitude
-        long = droneLocation!.longitude
+        let droneLocation = droneLocation0.coordinate
+   
+        lat = droneLocation.latitude
+        long = droneLocation.longitude
         
-        //add first waypoint
+        waypointMission.pointOfInterest = droneLocation
+        
         let loc1 = CLLocationCoordinate2DMake(lat, long)
-        currentWaypoint = DJIWaypoint(coordinate: loc1)
-        currentWaypoint?.altitude = Float((droneLocation0?.altitude)!)
-        self.waypointMission.add(currentWaypoint!)
+        let currentWaypoint = DJIWaypoint(coordinate: loc1)
+        ALTITUDE = Float(droneLocation0.altitude)
+        currentWaypoint.altitude = ALTITUDE
+        currentWaypoint.heading = 0
+        currentWaypoint.actionTimeoutInSeconds = 60
+        currentWaypoint.cornerRadiusInMeters = 5
+        //currentWaypoint.turnMode = .clockwise
+        currentWaypoint.gimbalPitch = 0
+        
+        //add waypoints to mission
+        waypointMission.add(currentWaypoint)
     }
-    func predefinedPath() {
-        //add second waypoint
-        let loc2 = CLLocationCoordinate2DMake(lat, long)
-        let wpoint2 = DJIWaypoint(coordinate: loc2)
-        wpoint2.altitude = Float((droneLocation0?.altitude)!) + 2
-        self.waypointMission.add(wpoint2)
-        
-        //add third waypoint
-        let loc3 = CLLocationCoordinate2DMake(lat+1, long)
-        let wpoint3 = DJIWaypoint(coordinate: loc3)
-        wpoint3.altitude =  wpoint2.altitude
-        self.waypointMission.add(wpoint3)
-        
-        //add 4th waypoint
-        let loc4 = CLLocationCoordinate2DMake(lat, long)
-        let wpoint4 = DJIWaypoint(coordinate: loc4)
-        wpoint4.altitude =  (currentWaypoint?.altitude)! - 2
-        self.waypointMission.add(wpoint4)
-        
-        //add 5th waypoint
-        let loc5 = CLLocationCoordinate2DMake(lat+1, long)
-        let wpoint5 = DJIWaypoint(coordinate: loc5)
-        wpoint5.altitude =  wpoint2.altitude
-        self.waypointMission.add(wpoint5)
-        
-        //add 6th waypoint
-        let loc6 = CLLocationCoordinate2DMake(lat, long)
-        let wpoint6 = DJIWaypoint(coordinate: loc6)
-        wpoint6.altitude =  (currentWaypoint?.altitude)! - 2
-        self.waypointMission.add(wpoint6)
-        executeMission()
-    }
-    func runLongCommands(dir: String, dist: Double){
-        //by here, we have each command being seperated into direction, distance, units
-        // next steps are find location, distance and direction of drone
+    var droneFirstLocation: CLLocation?
  
-        //if units are in meters
-        //convert all unit to GPS coordinate points
-        
+    func runLongCommands(dir: String, dist: Double){
+        disableVirtualStickModeSaid()
         if dir == "up"{
             //long = long + convertMetersToPoint(m: dist)
-            ALTITUDE = Float((droneLocation0?.altitude)!) + Float(dist)
+            ALTITUDE = Float((droneFirstLocation?.altitude)!) + Float(dist)
         }
         if dir == "down" {
             //long = long - convertMetersToPoint(m: dist)
-            ALTITUDE = Float((droneLocation0?.altitude)!) - Float(dist)
+            ALTITUDE = Float((droneFirstLocation?.altitude)!) - Float(dist)
         }
         if dir == "right"{
             lat = lat + convertMetersToPointLat(m: dist)
@@ -456,21 +430,19 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         if dir == "left"{
             lat = lat - convertMetersToPointLat(m: dist)
         }
+        //add second waypoint
+        let loc2 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint2 = DJIWaypoint(coordinate: loc2)
+        wpoint2.altitude = ALTITUDE
+        wpoint2.heading = 0
+        wpoint2.actionTimeoutInSeconds = 60
+        wpoint2.cornerRadiusInMeters = 5
+        //wpoint2.turnMode = .clockwise
+        wpoint2.gimbalPitch = 0
         
-        //this is second waypoint
-        var commLoc: CLLocationCoordinate2D = CLLocationCoordinate2DMake(0, 0)
-        commLoc.latitude = lat
-        commLoc.longitude = long
-        print("position now is " + String(describing: commLoc) )
-        
-        if CLLocationCoordinate2DIsValid(commLoc) {
-            let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
-            waypoint2.altitude = ALTITUDE
-            self.waypointMission.add(waypoint2)
-        }
-        //after adding all waypoint, user can call "start" to execute missions
+        //add waypoint to Mission
+        waypointMission.add(wpoint2)
     }
-    
     //disable Virtual Stick Mode so you can use remote control
     func disableVirtualStickModeSaid() {
         fc?.setVirtualStickModeEnabled(false, withCompletion: { (error: Error?) in
@@ -485,10 +457,10 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 commandCtrlData?.roll = 0
                 commandCtrlData?.yaw = 0
                 commandCtrlData?.verticalThrottle = 0
-              
             }
         })
     }
+    var currentMissionState: DJIWaypointMissionState?
     func pauseMissionSaid(){
         missionOperator?.pauseMission(completion: { (error: Error?) in
             if error != nil {
@@ -500,36 +472,34 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         })
     }
     func stopWaypointMissioin(){
-        missionOperator?.stopMission(completion: { (error: Error?) in
-            if error != nil {
-                self.showAlertResult(info: "Error stop mission " + (error?.localizedDescription)!)
-            }
-            else {
-                self.showAlertResult(info: "Mission stoped sucessfully!")
-            }
-        })
+        if currentMissionState == DJIWaypointMissionState.executing || currentMissionState == DJIWaypointMissionState.executionPaused{
+            missionOperator?.stopMission(completion: { (error: Error?) in
+                if error != nil {
+                    self.showAlertResult(info: "Error stop mission " + (error?.localizedDescription)!)
+                }
+                else {
+                    self.showAlertResult(info: "Mission stoped sucessfully!")
+                    self.waypointMission.removeAllWaypoints()
+                }
+            })
+        }
+        
     }
     func resumeMissionSaid(){
-        missionOperator?.resumeMission(completion: { (error: Error?) in
-            if error != nil {
-                self.showAlertResult(info: "Error resume mission " + (error?.localizedDescription)!)
-            }
-            else {
-                self.showAlertResult(info: "Mission resume sucessfully!")
-            }
-        })
+        if currentMissionState == DJIWaypointMissionState.executionPaused{
+            missionOperator?.resumeMission(completion: { (error: Error?) in
+                if error != nil {
+                    self.showAlertResult(info: "Error resume mission " + (error?.localizedDescription)!)
+                }
+                else {
+                    self.showAlertResult(info: "Mission resume sucessfully!")
+                }
+            })
+        }
     }
     func executeMission(){
-        
-        //prepare mission
-        // 5 mission paramenter always needed
-        self.waypointMission.maxFlightSpeed = 2
-        self.waypointMission.autoFlightSpeed = 1
-        self.waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
-        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
-        waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
-        
-        prepareMission(missionName: self.waypointMission)
+        //prepareMission before execute
+        prepareMission(missionName: waypointMission)
     }
     func prepareMission(missionName: DJIWaypointMission){
         let error = missionName.checkParameters()
@@ -540,7 +510,6 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         else {
             showAlertResult(info: "Validated Mission's Waypoints")
         }
-        
         print("Mission prepared!")
         func didMissionUpload(error: Error?){
             
@@ -552,11 +521,11 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 self.showAlertResult(info: "Uploading mission sucessfully, starting mission..!")
                 print("uploading mission successfil, starting mission..!")
                 // start mission
+                currentMissionState = DJIWaypointMissionState.readyToExecute
                 missionOperator?.startMission(completion: didMissionStart)
             }
         }
         func didMissionStart(error: Error?) {
-            
             if error != nil {
                 self.showAlertResult(info: "Error starting waypoint mission: " + (error?.localizedDescription)!)
                 print("Error starting waypoint mission: " + (error?.localizedDescription)!)
@@ -564,6 +533,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             else {
                 self.showAlertResult(info: "Start mission succesfully")
                 print("Start Mission sucess")
+                currentMissionState = DJIWaypointMissionState.executing
+                missionOperator?.removeAllListeners()
             }
         }
         missionOperator?.load(missionName)
@@ -572,12 +543,14 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             if event.error != nil {
                 self.showAlertResult(info: "There was an error trying to upload the mission, trying again")
                 print("There was an error trying to upload the mission, trying again")
+                self.currentMissionState = DJIWaypointMissionState.readyToUpload
                 self.missionOperator?.uploadMission(completion: didMissionUpload)
             }
             else {
                 self.showAlertResult(info:"Mission was uploaded, Starting mission")
                 print("Mission was uploaded, Starting mission")
                 // start mission
+                self.currentMissionState = DJIWaypointMissionState.readyToExecute
                 self.missionOperator?.startMission(completion: didMissionStart )
             }
         })
@@ -623,22 +596,6 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         }
         else {
             self.showAlertResult(info: "Take Off Component not existed")
-        }
-    }
-    func goHome(_ fc: DJIFlightController!) {
-        if fc != nil {
-            //changed autoLanding() to startLanding()
-            fc!.startGoHome(completion: {[weak self](error: Error?) -> Void in
-                if error != nil {
-                    self?.showAlertResult(info: "Go Home Error: \(error!.localizedDescription)")
-                }
-                else {
-                    self?.showAlertResult(info: "Go Home Succeeded.")
-                }
-            })
-        }
-        else {
-            self.showAlertResult(info: "Go Home Component not existed")
         }
     }
     func land(_ fc: DJIFlightController!) {

@@ -23,6 +23,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     //weak var appDelegate: AppDelegate! = UIApplication.shared.delegate as? AppDelegate
     
     var appDelegate = UIApplication.shared.delegate
+
     //display whether the drone is connected or not
     @IBOutlet weak var connectionStatus: UILabel!
     
@@ -116,7 +117,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         // my nuance sandbox credentials
         let SKSAppKey = "e44c885455471dd09b1cef28fae758e80348e989db7b28e4b794a9608cfbfb714783c59dcae26d66fe5c8ef843e7e0462fc9cf0a44f7eefc8b985c18935789da";         //start a session
         let SKSAppId = "NMDPTRIAL_danieltn91_gmail_com20170911202728";
@@ -407,15 +407,19 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 resumeMissionSaid()
                 VSMText.text = "Mission resume"
             }
-            //say "predefined" to predefine paths
-            if str == "predefined" {
-                predefinedPath()
-                /*
+            //say "remove" to remove all listeners
+            if str == "remove" {
+                missionOperator?.removeAllListeners()
+            }
+            //say "waypoints" to predefine paths
+            if str == "waypoints" {
+                //predefinedPath()
+                
                 transaction.cancel()
                 transaction.stopRecording()
                 let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PredefinedPathViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
-                 */
+                 
             }
         }
         if strArr.count > 1 && strArr.count < 3{
@@ -436,47 +440,58 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                     goHome(fc)
                 }
                 if strArr[1] == "up" {
-                    commands = ["go", "up"]
-                    regexCommandText.text = "\(commands)"
-                    runShortMovementCommands()
-                    commands = [] //reset commands array after it's done
+                    direction = "up"
+                    //runShortMovementCommands()
                     orderText.text = "1"
                 }
                 if strArr[1] == "down" {
-                    commands = ["go", "down"]
-                    regexCommandText.text = "\(commands)"
-                    runShortMovementCommands()
-                    commands = [] //reset commands array after it's done
+                    direction = "down"
+                   // runShortMovementCommands()
                     orderText.text = "1"
                 }
                 if strArr[1] == "left" {
-                    commands = ["go", "left"]
-                    regexCommandText.text = "\(commands)"
-                    runShortMovementCommands()
-                    commands = [] //reset commands array after it's done
+                    direction = "left"
+                    //runShortMovementCommands()
                     orderText.text = "1"
                 }
                 if strArr[1] == "right" {
-                    commands = ["go", "right"]
-                    regexCommandText.text = "\(commands)"
-                    runShortMovementCommands()
-                    commands = [] //reset commands array after it's done
+                    direction = "right"
+                    //runShortMovementCommands()
                     orderText.text = "1"
                 }
                 if strArr[1] == "forward" {
-                    commands = ["go", "forward"]
-                    regexCommandText.text = "\(commands)"
-                    runShortMovementCommands()
-                    commands = [] //reset commands array after it's done
+                    direction = "forward"
+                    //runShortMovementCommands()
                     orderText.text = "1"
                 }
                 if strArr[1] == "backward" {
-                    commands = ["go", "backward"]
-                    regexCommandText.text = "\(commands)"
-                    runShortMovementCommands()
-                    commands = [] //reset commands array after it's done
+                    direction = "backward"
+                   // runShortMovementCommands()
                     orderText.text = "1"
                 }
+            }
+            // say in distance
+            switch strArr[0] {
+            case "one":strArr[0] = "1"
+            case "two":strArr[0] = "2"
+            case "to":strArr[0] = "2"
+            case "three":strArr[0] = "3"
+            case "four":strArr[0] = "4"
+            case "five":strArr[0] = "5"
+            case "six":strArr[0] = "6"
+            case "seven":strArr[0] = "7"
+            case "eight":strArr[0] = "8"
+            case "nine":strArr[0] = "9"
+            case "ten":strArr[0] = "10"
+            default:
+                break
+            }
+            if (!(direction?.isEmpty)! && self.isStringAnDouble(string: strArr[0])){
+                distance = Double(strArr[0])
+                //set to label
+                distanceText.text = "\(distance)"
+                orderText.text = "2"
+                runLongCommands(dir: direction!, dist: distance!)
             }
             
         }
@@ -495,8 +510,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 orderText.text = "2"
                 
                 runLongCommands(dir: direction!, dist: distance!)
-                regexCommandText.text = "\(commands)"
-                commands = [] //reset commands array after it's done
             }
            //set boudary limit height and radius within 20m
             else if  strArr[0] == "limit" && isNumber(stringToTest: strArr[1]) == true && strArr[2] == "m"{
@@ -538,10 +551,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         if direction == "left" {
             directionTest.text = "go left"
-            commandCtrlData?.pitch = -1.0
+            commandCtrlData?.roll = -1.0
         }
         if direction == "right" {
-            commandCtrlData?.pitch = 1.0
+            commandCtrlData?.roll = 1.0
             directionTest.text = "go right"
         }
         if direction == "up" {
@@ -553,11 +566,11 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             directionTest.text = "go down"
         }
         if direction == "forward" {
-            commandCtrlData?.roll = 1.0
+            commandCtrlData?.pitch = 1.0
             directionTest.text = "go forward"
         }
         if direction == "backward"{
-            commandCtrlData?.roll = -1.0
+            commandCtrlData?.pitch = -1.0
             directionTest.text = "go backward"
         }
         // enable Virtual Stick Mode which it disable function on remote control
@@ -628,7 +641,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         self.waypointMission.maxFlightSpeed = 2
         self.waypointMission.autoFlightSpeed = 1
         self.waypointMission.headingMode = DJIWaypointMissionHeadingMode.auto
-        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.curved
+        self.waypointMission.flightPathMode = DJIWaypointMissionFlightPathMode.normal
         waypointMission.finishedAction = DJIWaypointMissionFinishedAction.noAction
         
         //get drone's location
@@ -682,7 +695,14 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         if CLLocationCoordinate2DIsValid(commLoc) {
             let waypoint2: DJIWaypoint = DJIWaypoint(coordinate: commLoc)
             waypoint2.altitude = ALTITUDE
+            waypoint2.heading = 0
+            waypoint2.actionTimeoutInSeconds = 60
+            waypoint2.cornerRadiusInMeters = 5
+            //wpoint2.turnMode = .clockwise
+            waypoint2.gimbalPitch = 0
+            
             self.waypointMission.add(waypoint2)
+            
         }
         //prepare mission
         prepareMission(missionName: self.waypointMission)
@@ -800,7 +820,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         
         //add third waypoint
-        let loc3 = CLLocationCoordinate2DMake(lat + myPointOffset, long)
+        lat = lat + myPointOffset
+        let loc3 = CLLocationCoordinate2DMake(lat, long)
         let wpoint3 = DJIWaypoint(coordinate: loc3)
         wpoint3.altitude =  wpoint2.altitude
         wpoint3.heading = 0
@@ -822,7 +843,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         
         //add 5th waypoint
-        let loc5 = CLLocationCoordinate2DMake(lat + myPointOffset, long)
+        lat = lat + myPointOffset
+        let loc5 = CLLocationCoordinate2DMake(lat, long)
         let wpoint5 = DJIWaypoint(coordinate: loc5)
         wpoint5.altitude =  wpoint2.altitude
         wpoint5.heading = 0
@@ -842,13 +864,14 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         wpoint6.gimbalPitch = 0
         
         //add 7th waypoint
-        let loc7 = CLLocationCoordinate2DMake(lat + myPointOffset, long)
+        lat = lat + myPointOffset
+        let loc7 = CLLocationCoordinate2DMake(lat , long)
         let wpoint7 = DJIWaypoint(coordinate: loc7)
         wpoint7.altitude = wpoint2.altitude
         wpoint7.heading = 0
         wpoint7.actionTimeoutInSeconds = 60
         wpoint7.cornerRadiusInMeters = 5
-        wpoint7.turnMode = .clockwise
+        //wpoint7.turnMode = .clockwise
         wpoint7.gimbalPitch = -90
         
         //add 8th waypoint
