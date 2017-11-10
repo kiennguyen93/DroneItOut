@@ -93,17 +93,12 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     
     //label name for debugging
     @IBOutlet weak var VSMText: UILabel!
-    @IBOutlet weak var orderText: UILabel!
     @IBOutlet weak var commandText: UILabel!
     @IBOutlet weak var directionText: UILabel!
     @IBOutlet weak var distanceText: UILabel!
     @IBOutlet weak var unitText: UILabel!
-    //@IBOutlet weak var htext: UILabel!
-    @IBOutlet weak var regexCommandText: UILabel!
-    
     @IBOutlet weak var positionLatText: UILabel!
     @IBOutlet weak var positionLonText: UILabel!
-    @IBOutlet weak var directionTest: UILabel!
     @IBOutlet weak var stateText: UILabel!
     
     @IBOutlet weak var predefinedButton: UIButton!
@@ -117,6 +112,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
         // my nuance sandbox credentials
         let SKSAppKey = "e44c885455471dd09b1cef28fae758e80348e989db7b28e4b794a9608cfbfb714783c59dcae26d66fe5c8ef843e7e0462fc9cf0a44f7eefc8b985c18935789da";         //start a session
         let SKSAppId = "NMDPTRIAL_danieltn91_gmail_com20170911202728";
@@ -370,9 +367,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         }
         
         // set and ensure fc is flight controller
-        let fc = (DJISDKManager.product() as! DJIAircraft).flightController
-        fc?.delegate = self
-
+        if let fc = (DJISDKManager.product() as! DJIAircraft).flightController {
+            fc.delegate = self
+        }
         
         //loop through all words
         for str in strArr{
@@ -442,32 +439,26 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 if strArr[1] == "up" {
                     direction = "up"
                     //runShortMovementCommands()
-                    orderText.text = "1"
                 }
                 if strArr[1] == "down" {
                     direction = "down"
                    // runShortMovementCommands()
-                    orderText.text = "1"
                 }
                 if strArr[1] == "left" {
                     direction = "left"
                     //runShortMovementCommands()
-                    orderText.text = "1"
                 }
                 if strArr[1] == "right" {
                     direction = "right"
                     //runShortMovementCommands()
-                    orderText.text = "1"
                 }
                 if strArr[1] == "forward" {
                     direction = "forward"
                     //runShortMovementCommands()
-                    orderText.text = "1"
                 }
                 if strArr[1] == "backward" {
                     direction = "backward"
                    // runShortMovementCommands()
-                    orderText.text = "1"
                 }
             }
             // say in distance
@@ -493,7 +484,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 distance = Double(strArr[0])
                 //set to label
                 distanceText.text = "\(String(describing: distance))"
-                orderText.text = "2"
                 runLongCommands(dir: direction, dist: distance!)
             }
         }
@@ -509,7 +499,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 //set to label
                 directionText.text = direction
                 distanceText.text = "\(distance)"
-                orderText.text = "2"
                 
                 runLongCommands(dir: direction, dist: distance!)
             }
@@ -552,28 +541,28 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         //commandCtrlData?.verticalThrottle = 0
         
         if direction == "left" {
-            directionTest.text = "go left"
+            directionText.text = "left"
             commandCtrlData?.roll = -1.0
         }
         if direction == "right" {
             commandCtrlData?.roll = 1.0
-            directionTest.text = "go right"
+            directionText.text = "right"
         }
         if direction == "up" {
             commandCtrlData?.verticalThrottle = 1.0
-            directionTest.text = "go up"
+            directionText.text = "up"
         }
         if direction == "down" {
             commandCtrlData?.verticalThrottle = -1.0
-            directionTest.text = "go down"
+            directionText.text = "down"
         }
         if direction == "forward" {
             commandCtrlData?.pitch = 1.0
-            directionTest.text = "go forward"
+            directionText.text = "forward"
         }
         if direction == "backward"{
             commandCtrlData?.pitch = -1.0
-            directionTest.text = "go backward"
+            directionText.text = "backward"
         }
         // enable Virtual Stick Mode which it disable function on remote control
         enterVirtualStickMode( newFlightCtrlData: commandCtrlData!)
