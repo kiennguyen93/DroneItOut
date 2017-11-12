@@ -14,7 +14,9 @@ import DJISDK
 import SpriteKit
 import CoreLocation
 import CoreBluetooth
-class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTransactionDelegate, DJIFlightControllerDelegate, CLLocationManagerDelegate{
+import VideoPreviewer
+
+class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTransactionDelegate, DJIFlightControllerDelegate, CLLocationManagerDelegate, DJICameraDelegate, DJIVideoFeedListener {
     // Does not break
     
     var appDelegate = UIApplication.shared.delegate
@@ -23,7 +25,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     
     //display text on screen
     @IBOutlet weak var recognitionText: UILabel!
-
+    
     var ALTITUDE: Float = 3
     var distance: Double?
     var direction: String?
@@ -40,6 +42,16 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     
     //DJI variable
     var connectionProduct: DJIBaseProduct? = nil
+    var camera: DJICamera!
+    var isRecording : Bool!
+    @IBOutlet var recordTimeLabel: UILabel!
+    
+    @IBOutlet var captureButton: UIButton!
+    
+    @IBOutlet var recordButton: UIButton!
+    
+    @IBOutlet var recordModeSegmentControl: UISegmentedControl!
+    @IBOutlet weak var videoView: UIView!
     
     //flight Controller
     var fc: DJIFlightController?
@@ -61,15 +73,17 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     var missionOperator: DJIWaypointMissionOperator? {
         return DJISDKManager.missionControl()?.waypointMissionOperator()
     }
-  
+    
     //label name for debugging
     @IBOutlet weak var directionText: UILabel!
     @IBOutlet weak var positionLatText: UILabel!
     @IBOutlet weak var positionLonText: UILabel!
     @IBOutlet weak var stateText: UILabel!
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        recordTimeLabel.isHidden = true
+        
         let voiceViewController = VoiceViewController()
         let djiRootViewController = DJIRootViewController()
         voiceViewController.dismiss(animated: true)
@@ -87,14 +101,14 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         
         // start nuance session with my account
         sksSession = SKSession(url: URL(string: SKSServerUrl), appToken: SKSAppKey)
-     
+        
         //Register
         DJISDKManager.registerApp(with: self)
         
         //Connect to product
         DJISDKManager.product()
         checkProductConnected()
-       
+        
         let aircraft: DJIAircraft? = self.fetchAircraft()
         if aircraft != nil {
             aircraft!.delegate = self
@@ -104,11 +118,22 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         //beign listening to user and this gets called repeatedly to ensure countinue listening
         beginApp()
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        VideoPreviewer.instance().setView(self.videoView)
+        
+        DJISDKManager.registerApp(with: self)
+    }
     override func viewWillAppear(_ animated: Bool) {
         guard let connectedKey = DJIProductKey(param: DJIParamConnection) else {
             NSLog("Error creating the connectedKey")
             return;
         }
+        super.viewWillDisappear(animated)
+        VideoPreviewer.instance().setView(nil)
+        DJISDKManager.videoFeeder()?.primaryVideoFeed.remove(self)
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             DJISDKManager.keyManager()?.startListeningForChanges(on: connectedKey, withListener: self, andUpdate: { (oldValue: DJIKeyedValue?, newValue : DJIKeyedValue?) in
                 if newValue != nil {
@@ -124,20 +149,40 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             })
         }
     }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        VideoPreviewer.instance().setView(nil)
+        DJISDKManager.videoFeeder()?.primaryVideoFeed.remove(self)
+        
+    }
     override func viewDidDisappear(_ animated: Bool) {
         DJISDKManager.keyManager()?.stopAllListening(ofListeners: self)
         sksTransaction?.cancel()
         sksTransaction?.stopRecording()
+        
+        VideoPreviewer.instance().setView(self.videoView)
+        DJISDKManager.registerApp(with: self)
     }
     func checkProductConnected() {
         //Display conneciton status
         if ConnectedProductManager.sharedInstance.product != nil {
             connectionStatus.text = "Connected"
             connectionStatus.textColor = UIColor.green
+            
+            camera = self.fetchCamera()
+            if (camera != nil) {
+                camera.delegate = self
+                DJISDKManager.videoFeeder()?.primaryVideoFeed.add(self, with: nil)
+            }
         }
         else {
             connectionStatus.text = "Disconnected"
             connectionStatus.textColor = UIColor.red
+            //clear video data
+            camera = nil
+            VideoPreviewer.instance().clearVideoData()
+            VideoPreviewer.instance().close()
         }
     }
     func flightController(_ fc: DJIFlightController, didUpdateSystemState state: DJIFlightControllerState) {
@@ -157,6 +202,10 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             print("Error:\(error!.localizedDescription)")
             return
         }
+        DJISDKManager.startConnectionToProduct()
+        DJISDKManager.videoFeeder()?.primaryVideoFeed.add(self, with: nil)
+        VideoPreviewer.instance().start()
+        
     }
     //auto make transactons
     func beginApp() {
@@ -234,7 +283,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     }
     // *************This is where the action happens after speech has been reconized!*********** //
     func transaction(_ transaction: SKTransaction!, didReceive recognition: SKRecognition!) {
-   
+        
         //convert all text to lowercase
         
         //make an array of word said
@@ -250,7 +299,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             strArr[0] = "start"
         }
         if strArr.count == 2 || strArr.count == 3{
-         
+            
             switch strArr[1] {
             case "one":
                 strArr[1] = "1"
@@ -328,14 +377,14 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DJIRootViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
             }
-
+            
         }
         if strArr.count > 1{
             //take off
             if strArr[0] == "take" && strArr[1] == "off" {
                 takeOff(fc)
             }
-            //set boudary limit height and radius within 20m
+                //set boudary limit height and radius within 20m
             else if strArr[0] == "limit" && isNumber(stringToTest: strArr[1]) == true{
                 enableMaxFlightRadius(fc,dist: strArr[1])
             }
@@ -363,7 +412,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     var lat: Double = 0.0
     var long: Double = 0.0
     //******** RUN COMMANDS METHODS **********//
-   
+    
     func firstWaypoint(){
         disableVirtualStickModeSaid()
         // cancelMissionSaid()
@@ -388,12 +437,12 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         }
         //convert CLLocation to CLLocationCoordinate2D
         let droneLocation0 = droneLocationValue.value as! CLLocation
-       
+        
         //set drone locatoin to a gobal variable to use it later
         droneFirstLocation = droneLocation0
         
         let droneLocation = droneLocation0.coordinate
-   
+        
         lat = droneLocation.latitude
         long = droneLocation.longitude
         
@@ -413,7 +462,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         waypointMission.add(currentWaypoint)
     }
     var droneFirstLocation: CLLocation?
- 
+    
     func runLongCommands(dir: String, dist: Double){
         disableVirtualStickModeSaid()
         if dir == "up"{
@@ -666,8 +715,159 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             return;
         }
     }
+    
+    /* ===========================Video Recording Part =================================*/
+    override func fetchCamera() -> DJICamera? {
+        let product = DJISDKManager.product()
+        
+        if (product == nil) {
+            return nil
+        }
+        
+        if (product!.isKind(of: DJIAircraft.self)) {
+            return (product as! DJIAircraft).camera
+        } else if (product!.isKind(of: DJIHandheld.self)) {
+            return (product as! DJIHandheld).camera
+        }
+        
+        return nil
+    }
+    
+    func formatSeconds(seconds: UInt) -> String {
+        let date = Date(timeIntervalSince1970: TimeInterval(seconds))
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "mm:ss"
+        
+        return(dateFormatter.string(from: date))
+    }
+    
+    //
+    //  DJIBaseProductDelegate
+    //
+    
+    func productConnected(_ product: DJIBaseProduct?) {
+        
+        NSLog("Product Connected")
+        
+        
+        if (product != nil) {
+            product!.delegate = self
+            
+            camera = self.fetchCamera()
+            
+            if (camera != nil) {
+                camera!.delegate = self
+                
+                VideoPreviewer.instance().start()
+                
+            }
+        }
+    }
+    
     func productDisconnected() {
         NSLog("Product Disconnected")
+        
+        camera = nil
+        VideoPreviewer.instance().clearVideoData()
+        VideoPreviewer.instance().close()
+        
+    }
+    
+    
+    //
+    //  DJICameraDelegate
+    //
+    
+    func camera(_ camera: DJICamera, didUpdate cameraState: DJICameraSystemState) {
+        self.isRecording = cameraState.isRecording
+        self.recordTimeLabel.isHidden = !self.isRecording
+        
+        self.recordTimeLabel.text = formatSeconds(seconds: cameraState.currentVideoRecordingTimeInSeconds)
+        
+        if (self.isRecording == true) {
+            self.recordButton.setTitle("Stop Record", for: UIControlState.normal)
+        } else {
+            self.recordButton.setTitle("Start Record", for: UIControlState.normal)
+        }
+        
+        if (cameraState.mode == DJICameraMode.shootPhoto) {
+            self.recordModeSegmentControl.selectedSegmentIndex = 0
+        } else {
+            self.recordModeSegmentControl.selectedSegmentIndex = 1
+        }
+        
+    }
+    func videoFeed(_ videoFeed: DJIVideoFeed, didUpdateVideoData rawData: Data) {
+        let videoData = rawData as NSData
+        let videoBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: videoData.length)
+        
+        videoData.getBytes(videoBuffer, length: videoData.length)
+        
+        
+        VideoPreviewer.instance().push(videoBuffer, length: Int32(videoData.length))
+    }
+    //
+    //  IBAction Methods
+    //
+    
+    @IBAction func captureAction(_ sender: UIButton) {
+        
+        if (camera != nil) {
+            camera.setMode(DJICameraMode.shootPhoto, withCompletion: { (error) in
+                
+                if (error != nil) {
+                    NSLog("Set Photo Mode Error: " + String(describing: error))
+                }
+                
+                self.camera.startShootPhoto(completion: { (error) in
+                    if (error != nil) {
+                        NSLog("Shoot Photo Mode Error: " + String(describing: error))
+                    }
+                })
+            })
+        }
+    }
+    
+    @IBAction func recordAction(_ sender: UIButton) {
+        
+        if (camera != nil) {
+            if (self.isRecording) {
+                camera.stopRecordVideo(completion: { (error) in
+                    if (error != nil) {
+                        NSLog("Stop Record Video Error: " + String(describing: error))
+                    }
+                })
+            } else {
+                camera.setMode(DJICameraMode.recordVideo,  withCompletion: { (error) in
+                    
+                    self.camera.startRecordVideo(completion: { (error) in
+                        if (error != nil) {
+                            NSLog("Stop Record Video Error: " + String(describing: error))
+                        }
+                    })
+                })
+            }
+        }
+    }
+    
+    
+    @IBAction func recordModeSegmentChange(_ sender: UISegmentedControl) {
+        
+        if (camera != nil) {
+            if (sender.selectedSegmentIndex == 0) {
+                camera.setMode(DJICameraMode.shootPhoto,  withCompletion: { (error) in
+                    
+                })
+                
+            } else if (sender.selectedSegmentIndex == 1) {
+                camera.setMode(DJICameraMode.recordVideo,  withCompletion: { (error) in
+                    
+                })
+                
+                
+            }
+        }
     }
 }
 
