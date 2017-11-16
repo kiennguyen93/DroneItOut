@@ -284,32 +284,21 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         super.didReceiveMemoryWarning()
     }
     
-    
     // *************This is where the action happens after speech has been reconized!*********** //
     func transaction(_ transaction: SKTransaction!, didReceive recognition: SKRecognition!) {
-        
-        
+      
         //convert all text to lowercase
      
         //make an array of word said
         var words = recognition.text.lowercased()
-        if words == "check off" {
-            words = "take off"
-        }
-        if words == "Brady fight" || words == "Brady find"{
-            words = "predefined"
-        }
-        strArr = words.characters.split{$0 == " "}.map(String.init)
         
+        strArr = words.characters.split{$0 == " "}.map(String.init)
         if strArr[0] == "goal" {
             strArr[0] = "go"
         }
         if strArr[0] == "alright" {
             strArr[0] = "go"
             strArr.append("right")
-        }
-        if strArr[0] == "redefine" || strArr[0] == "redefined" || strArr[0] == "predefine"{
-            strArr[0] = "predefined"
         }
         if strArr.count == 2{
             if strArr[0] == "call" {
@@ -320,6 +309,9 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
             if strArr[1] == "let" {
                 strArr[1] = "left"
+            }
+            if strArr[1] == "check"{
+                strArr[1] = "take"
             }
         }
         if strArr.count == 3 { // go for work
@@ -410,13 +402,13 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             }
             //say "waypoints" to predefine paths
             if str == "waypoints" {
-                //predefinedPath()
+               // predefinedPath()
                 
                 transaction.cancel()
                 transaction.stopRecording()
                 let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "PredefinedPathViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
-                 
+                
             }
         }
         if strArr.count > 1 && strArr.count < 3{
@@ -498,7 +490,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 
                 //set to label
                 directionText.text = direction
-                distanceText.text = "\(distance)"
+                distanceText.text = "\(String(describing: distance))"
                 
                 runLongCommands(dir: direction, dist: distance!)
             }
@@ -626,7 +618,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         // cancelMissionSaid()
         self.waypointMission.removeAllWaypoints()
         waypointMission = DJIMutableWaypointMission()
-        
         
         // 5 mission paramenter always needed
         self.waypointMission.maxFlightSpeed = 2
@@ -766,7 +757,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         waypointMission.autoFlightSpeed = 1
         waypointMission.headingMode = .auto
         waypointMission.rotateGimbalPitch = true
-        waypointMission.flightPathMode = .normal
+        waypointMission.flightPathMode = .curved
         waypointMission.finishedAction = .noAction
         waypointMission.gotoFirstWaypointMode = .pointToPoint
         

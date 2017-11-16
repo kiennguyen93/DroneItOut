@@ -369,8 +369,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
             if str == "remove" {
                 missionOperator?.removeAllListeners()
             }
-            if str == "again" {
-                
+            if str == "waypoints" {
+                predefinedPath()
             }
             //say "back" to back to VoiceViewController
             if str == "homepage" {
@@ -412,7 +412,140 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     var lat: Double = 0.0
     var long: Double = 0.0
     //******** RUN COMMANDS METHODS **********//
-    
+    func predefinedPath() {
+        disableVirtualStickModeSaid()
+        // cancelMissionSaid()
+        self.waypointMission.removeAllWaypoints()
+        waypointMission = DJIMutableWaypointMission()
+        
+        // 5 mission paramenter always needed
+        waypointMission.maxFlightSpeed = 2
+        waypointMission.autoFlightSpeed = 1
+        waypointMission.headingMode = .auto
+        waypointMission.rotateGimbalPitch = true
+        waypointMission.flightPathMode = .normal
+        waypointMission.finishedAction = .noAction
+        waypointMission.gotoFirstWaypointMode = .pointToPoint
+        
+        //get drone's location
+        guard let locationKey = DJIFlightControllerKey(param: DJIFlightControllerParamAircraftLocation) else {
+            return
+        }
+        guard let droneLocationValue = DJISDKManager.keyManager()?.getValueFor(locationKey) else {
+            return
+        }
+        
+        //convert CLLocation to CLLocationCoordinate2D
+        let droneLocation0 = droneLocationValue.value as! CLLocation
+        let droneLocation = droneLocation0.coordinate
+        //self.droneLocation = currentState?.aircraftLocation?
+        
+        var lat: Double = droneLocation.latitude
+        var long: Double = droneLocation.longitude
+        
+        waypointMission.pointOfInterest = droneLocation
+        let offset = 0.0000899322
+        
+        let loc1 = CLLocationCoordinate2DMake(lat, long)
+        let currentWaypoint = DJIWaypoint(coordinate: loc1)
+        currentWaypoint.altitude = Float(droneLocation0.altitude)
+        currentWaypoint.heading = 0
+        currentWaypoint.actionTimeoutInSeconds = 60
+        currentWaypoint.cornerRadiusInMeters = 5
+        currentWaypoint.turnMode = .clockwise
+        currentWaypoint.gimbalPitch = 0
+        
+        
+        //add second waypoint
+        let loc2 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint2 = DJIWaypoint(coordinate: loc2)
+        wpoint2.altitude = Float((droneLocation0.altitude) + 2)
+        wpoint2.heading = 0
+        wpoint2.actionTimeoutInSeconds = 60
+        wpoint2.cornerRadiusInMeters = 5
+        wpoint2.turnMode = .clockwise
+        wpoint2.gimbalPitch = 0
+        
+        
+        //add third waypoint
+        lat = lat + myPointOffset
+        let loc3 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint3 = DJIWaypoint(coordinate: loc3)
+        wpoint3.altitude =  wpoint2.altitude
+        wpoint3.heading = 0
+        wpoint3.actionTimeoutInSeconds = 60
+        wpoint3.cornerRadiusInMeters = 5
+        wpoint3.turnMode = .clockwise
+        wpoint3.gimbalPitch = 0
+        
+        
+        //add 4th waypoint
+        let loc4 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint4 = DJIWaypoint(coordinate: loc4)
+        wpoint4.altitude =  (currentWaypoint.altitude) - 2
+        wpoint4.heading = 0
+        wpoint4.actionTimeoutInSeconds = 60
+        wpoint4.cornerRadiusInMeters = 5
+        wpoint4.turnMode = .clockwise
+        wpoint4.gimbalPitch = 0
+        
+        
+        //add 5th waypoint
+        lat = lat + myPointOffset
+        let loc5 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint5 = DJIWaypoint(coordinate: loc5)
+        wpoint5.altitude =  wpoint2.altitude
+        wpoint5.heading = 0
+        wpoint5.actionTimeoutInSeconds = 60
+        wpoint5.cornerRadiusInMeters = 5
+        wpoint5.turnMode = .clockwise
+        wpoint5.gimbalPitch = 0
+        
+        //add 6th waypoint
+        let loc6 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint6 = DJIWaypoint(coordinate: loc6)
+        wpoint6.altitude =  (currentWaypoint.altitude) + 2
+        wpoint6.heading = 0
+        wpoint6.actionTimeoutInSeconds = 60
+        wpoint6.cornerRadiusInMeters = 5
+        wpoint6.turnMode = .clockwise
+        wpoint6.gimbalPitch = 0
+        
+        //add 7th waypoint
+        lat = lat + myPointOffset
+        let loc7 = CLLocationCoordinate2DMake(lat , long)
+        let wpoint7 = DJIWaypoint(coordinate: loc7)
+        wpoint7.altitude = wpoint2.altitude
+        wpoint7.heading = 0
+        wpoint7.actionTimeoutInSeconds = 60
+        wpoint7.cornerRadiusInMeters = 5
+        wpoint7.turnMode = .clockwise
+        wpoint7.gimbalPitch = 0
+        
+        //add 8th waypoint
+        let loc8 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint8 = DJIWaypoint(coordinate: loc8)
+        wpoint8.altitude =  (currentWaypoint.altitude) - 2
+        wpoint8.heading = 0
+        wpoint8.actionRepeatTimes = 1
+        wpoint8.actionTimeoutInSeconds = 60
+        wpoint8.cornerRadiusInMeters = 5
+        wpoint8.turnMode = .clockwise
+        wpoint8.gimbalPitch = 0
+        
+        //add waypoints to mission
+        waypointMission.add(currentWaypoint)
+        waypointMission.add(wpoint2)
+        waypointMission.add(wpoint3)
+        waypointMission.add(wpoint4)
+        waypointMission.add(wpoint5)
+        waypointMission.add(wpoint6)
+        waypointMission.add(wpoint7)
+        waypointMission.add(wpoint8)
+        
+        //prepareMission before execute
+        prepareMission(missionName: waypointMission)
+    }
     func firstWaypoint(){
         disableVirtualStickModeSaid()
         // cancelMissionSaid()
@@ -803,16 +936,13 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         let videoBuffer = UnsafeMutablePointer<UInt8>.allocate(capacity: videoData.length)
         
         videoData.getBytes(videoBuffer, length: videoData.length)
-        
-        
         VideoPreviewer.instance().push(videoBuffer, length: Int32(videoData.length))
     }
+    
     //
     //  IBAction Methods
     //
-    
-    @IBAction func captureAction(_ sender: UIButton) {
-        
+    @IBAction func captureAction(_ sender: UIButton) {        
         if (camera != nil) {
             camera.setMode(DJICameraMode.shootPhoto, withCompletion: { (error) in
                 
@@ -830,7 +960,6 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     }
     
     @IBAction func recordAction(_ sender: UIButton) {
-        
         if (camera != nil) {
             if (self.isRecording) {
                 camera.stopRecordVideo(completion: { (error) in
@@ -864,8 +993,6 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 camera.setMode(DJICameraMode.recordVideo,  withCompletion: { (error) in
                     
                 })
-                
-                
             }
         }
     }
