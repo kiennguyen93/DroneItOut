@@ -75,7 +75,7 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     }
     
     //label name for debugging
-    @IBOutlet weak var directionText: UILabel!
+    @IBOutlet weak var commandText: UILabel!
     @IBOutlet weak var positionLatText: UILabel!
     @IBOutlet weak var positionLonText: UILabel!
     @IBOutlet weak var stateText: UILabel!
@@ -188,7 +188,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     func flightController(_ fc: DJIFlightController, didUpdateSystemState state: DJIFlightControllerState) {
         aircraftLocation = (state.aircraftLocation?.coordinate)!
         aircraftHeading = (fc.compass?.heading)!
-        positionLonText.text = "Altitude: " + String(state.altitude) + " m"
+        positionLonText.text = String(describing: aircraftLocation.longitude)
+        positionLatText.text = String(describing: aircraftLocation.latitude)
     }
     
     enum SKSState {
@@ -298,6 +299,9 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         if strArr[0] == "stock" {
             strArr[0] = "start"
         }
+        if strArr[0] == "check" {
+            strArr[0] = "take"
+        }
         if strArr.count == 2 || strArr.count == 3{
             
             switch strArr[1] {
@@ -338,38 +342,54 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         // set and ensure fc is flight controller
         let fc = (DJISDKManager.product() as! DJIAircraft).flightController
         fc?.delegate = self
-        
+       
         //loop through all words
         for str in strArr{
             // say "land" to make the drone land
             if str == "land" {
+                //set to label
+                commandText.text = str
                 land(fc)
             }
             //say "disable" to disable virtual stick mode
             if str == "disable" {
+                //set to label
+                commandText.text = str
                 disableVirtualStickModeSaid()
             }
             //say "execute" to executeMission
             if str == "start" {
+                //set to label
+                commandText.text = str
                 executeMission()
             }
             // say "cancel" to cancel mission
             if str == "cancel" {
+                //set to label
+                commandText.text = str
                 stopWaypointMissioin()
             }
             // say "stop" to stop mission
             if str == "stop" {
+                //set to label
+                commandText.text = str
                 stopWaypointMissioin()
             }
             // say "resume" to resume mission
             if str == "resume" {
+                //set to label
+                commandText.text = str
                 resumeMissionSaid()
             }
             //say "remove to remove all listeners
             if str == "remove" {
+                //set to label
+                commandText.text = str
                 missionOperator?.removeAllListeners()
             }
             if str == "waypoints" || str == "execute" {
+                //set to label
+                commandText.text = str
                 predefinedPath()
             }
             //say "back" to back to VoiceViewController
@@ -382,18 +402,20 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         if strArr.count > 1{
             //take off
             if strArr[0] == "take" && strArr[1] == "off" {
+                //set to label
+                commandText.text = strArr[0] + strArr[1]
                 takeOff(fc)
             }
                 //set boudary limit height and radius within 20m
             else if strArr[0] == "limit" && isNumber(stringToTest: strArr[1]) == true{
+                //set to label
+                commandText.text = strArr[0]
                 enableMaxFlightRadius(fc,dist: strArr[1])
             }
             else if (strArr[0] == "up" || strArr[0] == "down" || strArr[0] == "left" || strArr[0] == "right") && self.isStringAnDouble(string: strArr[1]) {
                 direction = strArr[0]
                 distance = Double(strArr[1])
                 
-                //set to label
-                directionText.text = direction
                 runLongCommands(dir: direction!, dist: distance!)
             }
             else if (strArr[0] == "voice" && (strArr[1] == "commands" || strArr[1] == "commands")){
@@ -539,6 +561,9 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         
         lat = droneLocation.latitude
         long = droneLocation.longitude
+        positionLonText.text = String(describing: aircraftLocation.longitude)
+        positionLatText.text = String(describing: aircraftLocation.latitude)
+        
         
         waypointMission.pointOfInterest = droneLocation
         

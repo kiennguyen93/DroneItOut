@@ -142,7 +142,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             aircraft!.delegate = self
             aircraft!.flightController?.delegate = self
         }
-        
+        VSMText.text = "VSM is disable"
         missionStatusBar.setProgress(0, animated: true)
         //beign listening to user and this gets called repeatedly to ensure countinue listening
         beginApp()
@@ -310,8 +310,8 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             if strArr[1] == "let" {
                 strArr[1] = "left"
             }
-            if strArr[1] == "check"{
-                strArr[1] = "take"
+            if strArr[0] == "check"{
+                strArr[0] = "take"
             }
         }
         if strArr.count == 3 { // go for work
@@ -359,45 +359,52 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         }
         
         // set and ensure fc is flight controller
-        if let fc = (DJISDKManager.product() as! DJIAircraft).flightController {
-            fc.delegate = self
-        }
+        let fc = (DJISDKManager.product() as! DJIAircraft).flightController
+            fc?.delegate = self
+        
         
         //loop through all words
         for str in strArr{
-            
             // say "land" to make the drone land
             if str == "land" {
+                commandText.text = str
                 land(fc)
             }
             //say "enable" to enable virtual stick mode
             if str == "enable" {
+                commandText.text = str
                 enableVirtualStickModeSaid()
             }
             //say "disable" to disable virtual stick mode
             if str == "disable" {
+                commandText.text = str
                 disableVirtualStickModeSaid()
             }
             //say "execute" to executeMission
             if str == "execute" {
+                commandText.text = str
                 executeMission()
             }
             // say "cancel" to cancel mission
             if str == "cancel" {
+                commandText.text = str
                stopWaypointMissioin()
                 VSMText.text = "Mission cancelled"
             }
             // say "stop" to stop mission
             if str == "stop" {
+                commandText.text = str
                 stopWaypointMissioin()
             }
             // say "resume" to resume mission
             if str == "resume" {
+                commandText.text = str
                 resumeMissionSaid()
                 VSMText.text = "Mission resume"
             }
             //say "remove" to remove all listeners
             if str == "remove" {
+                commandText.text = str
                 missionOperator?.removeAllListeners()
             }
             //say "waypoints" to predefine paths
@@ -415,16 +422,20 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             
             //take off
             if strArr[0] == "take" && strArr[1] == "off" {
+                commandText.text = strArr[0] + strArr[1]
                 takeOff(fc)
             }
             if strArr[0] == "follow" && strArr[1] == "me" {
+                commandText.text = strArr[0] + strArr[1]
                 followMe()
             }
             if strArr[0] == "stop" && strArr[1] == "follow" {
+                commandText.text = strArr[0] + strArr[1]
                 stopFollow()
             }
             // say "goHome" to make the drone land
             if strArr[0] == "go" {
+                commandText.text = strArr[0]
                 if strArr[1] == "home"{
                     goHome(fc)
                 }
@@ -452,6 +463,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                     direction = "backward"
                    // runShortMovementCommands()
                 }
+                directionText.text = direction
             }
             // say in distance
             switch strArr[0] {
@@ -475,7 +487,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
             else if self.isStringAnDouble(string: strArr[0]) {
                 distance = Double(strArr[0])
                 //set to label
-                distanceText.text = "\(String(describing: distance))"
+                distanceText.text = "\(String(describing: distance!))"
                 runLongCommands(dir: direction, dist: distance!)
             }
         }
@@ -490,7 +502,7 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
                 
                 //set to label
                 directionText.text = direction
-                distanceText.text = "\(String(describing: distance))"
+                distanceText.text = "\(String(describing: distance!))"
                 
                 runLongCommands(dir: direction, dist: distance!)
             }
@@ -516,11 +528,11 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     func runShortMovementCommands() {
         enableVirtualStickModeSaid()
-        var direction: String = ""
+        var direction: String! = ""
         print("Short commands: \(commands)")
         if strArr.count == 2 { //Go up
             direction = strArr[1]
-            distanceText.text = "\(direction)"
+            distanceText.text = "\(direction!)"
         }
         
         //initalize a data object. They have pitch, roll, yaw, and throttle
@@ -661,9 +673,11 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         }
         if dir == "noth" || dir == "right"{
             lat = lat + convertMetersToPointLat(m: dist)
+            ALTITUDE = Float(droneLocation0.altitude)
         }
         if dir == "south" || dir == "left"{
             lat = lat - convertMetersToPointLat(m: dist)
+            ALTITUDE = Float(droneLocation0.altitude)
         }
         
         //this is second waypoint
@@ -1010,9 +1024,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     //************ Flight Controller Drone Method *****************//
     func takeOff(_ fc: DJIFlightController!) {
         if fc != nil {
-            
-            //fc!.takeoff(completion: {[weak self](error: Error?) -> Void in
-            //replace takoff to startTakeoff
             fc.startTakeoff(completion: {[weak self](error: Error?) -> Void in
                 if error != nil {
                     self?.showAlertResult(info: "TakeOff Error: \(error!.localizedDescription)")
@@ -1028,7 +1039,6 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
     }
     func goHome(_ fc: DJIFlightController!) {
         if fc != nil {
-            //changed autoLanding() to startLanding()
             fc!.startGoHome(completion: {[weak self](error: Error?) -> Void in
                 if error != nil {
                     self?.showAlertResult(info: "Go Home Error: \(error!.localizedDescription)")
@@ -1090,9 +1100,10 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         })
     }
     func enableMaxFlightRadius(_ fc: DJIFlightController!, dist: String) {
-        let distance = Float(dist)
-        self.setMaxFlightHeight(fc,distance: distance!)
-        self.setMaxFlightRadius(fc,distance: distance!)
+        let distance:Float! = Float(dist)
+        self.setMaxFlightHeight(fc,distance: distance)
+        self.setMaxFlightRadius(fc,distance: distance)
+        print("float number: \(distance)")
         fc.setMaxFlightRadiusLimitationEnabled(true, withCompletion: {[weak self](error: Error?) -> Void in
             if error != nil {
                 self?.showAlertResult(info: "Enable Max Flight Radius Error: \(error!.localizedDescription)")
