@@ -11,6 +11,7 @@
 
 @implementation DJIAircraftAnnotationView
 
+//Create the aircraft symbol on the map once the drone is connected
 - (instancetype)initWithAnnotation:(id <MKAnnotation>)annotation reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithAnnotation:annotation reuseIdentifier:reuseIdentifier];

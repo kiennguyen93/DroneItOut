@@ -18,7 +18,7 @@
 #define ENTER_DEBUG_MODE 0
 
 @interface DJIRootViewController ()<DJIGSButtonViewControllerDelegate, DJIWaypointConfigViewControllerDelegate, MKMapViewDelegate, CLLocationManagerDelegate, DJISDKManagerDelegate, DJIFlightControllerDelegate,UITableViewDelegate>
-
+//initilizations of the button and text view on the root view
 @property (nonatomic, assign) BOOL isEditingPoints;
 @property (nonatomic, strong) DJIGSButtonViewController *gsButtonVC;
 @property (nonatomic, strong) DJIWaypointConfigViewController *waypointConfigVC;
@@ -60,7 +60,7 @@
     [super viewWillDisappear:animated];
     [self.locationManager stopUpdatingLocation];
 }
-
+//The initial screen once the app is loaded
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.data = [[NSArray alloc]initWithObjects: @"Voice Commands", @"Follow Me", @"Predefined", nil];
@@ -80,7 +80,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     return [self.data count];
 }
-
+//The table to display different modes on the right side of the screen
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     
     static NSString *simpleTableIdentifier = @"Modes";
@@ -96,7 +96,7 @@
     
                 
 }
-
+//Select the correct seque for each of the button
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     
     UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
@@ -169,7 +169,7 @@
 
 -(void) registerApp
 {
-    //Please enter your App key in the info.plist file to register the app.
+    //The APP key has been entered to Info.plist
     [DJISDKManager registerAppWithDelegate:self];
 }
 
@@ -188,7 +188,7 @@
 #endif
     }
 }
-
+//Check to see if the product was connected to the application
 - (void)productConnected:(DJIBaseProduct *)product
 {
     if (product){
@@ -214,7 +214,7 @@
 -(DJIWaypointMissionOperator *)missionOperator {
     return [DJISDKManager missionControl].waypointMissionOperator;
 }
-
+//Focus the map once the aircraft is connected
 - (void)focusMap
 {
     if (CLLocationCoordinate2DIsValid(self.droneLocation)) {
@@ -226,7 +226,7 @@
         [self.mapView setRegion:region animated:YES];
     }
 }
-
+//Ask the user for permission to access the mobile's location service
 #pragma mark CLLocation Methods
 -(void) startUpdateLocation
 {
@@ -246,7 +246,7 @@
         ShowMessage(@"Location Service is not available", @"", nil, @"OK");
     }
 }
-
+//Add waypoints to the map
 #pragma mark UITapGestureRecognizer Methods
 - (void)addWaypoints:(UITapGestureRecognizer *)tapGesture
 {
@@ -259,7 +259,7 @@
 }
 
 #pragma mark - DJIWaypointConfigViewControllerDelegate Methods
-
+//Delete all of the waypoints on the map
 - (void)cancelBtnActionInDJIWaypointConfigViewController:(DJIWaypointConfigViewController *)waypointConfigVC
 {
     WeakRef(weakSelf);
@@ -270,7 +270,7 @@
     }];
     
 }
-
+//Show alert with DJI default messages
 - (void)showAlertViewWithTitle:(NSString *)title withMessage:(NSString *)message
 {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
@@ -279,6 +279,7 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
+//FINISH button to upload the mission
 - (void)finishBtnActionInDJIWaypointConfigViewController:(DJIWaypointConfigViewController *)waypointConfigVC
 {
     WeakRef(weakSelf);
@@ -443,7 +444,7 @@
 }
 
 #pragma mark DJIFlightControllerDelegate
-
+//Display the inflight information
 - (void)flightController:(DJIFlightController *)fc didUpdateState:(DJIFlightControllerState *)state
 {
     self.droneLocation = state.aircraftLocation.coordinate;

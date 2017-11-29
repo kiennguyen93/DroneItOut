@@ -25,6 +25,7 @@
 
 #pragma mark - Property Method
 
+//Set the buttons of the screen
 - (void)setMode:(DJIGSViewMode)mode
 {
     
@@ -40,14 +41,14 @@
 }
 
 #pragma mark - IBAction Methods
-
+//The BACK button
 - (IBAction)backBtnAction:(id)sender {
     [self setMode:DJIGSViewMode_ViewMode];
     if ([_delegate respondsToSelector:@selector(switchToMode:inGSButtonVC:)]) {
         [_delegate switchToMode:self.mode inGSButtonVC:self];
     }
 }
-
+//The STOP button
 - (IBAction)stopBtnAction:(id)sender {
  
     if ([_delegate respondsToSelector:@selector(stopBtnActionInGSButtonVC:)]) {
@@ -55,7 +56,7 @@
     }
     
 }
-
+//The CLEAR button
 - (IBAction)clearBtnAction:(id)sender {
     
     if ([_delegate respondsToSelector:@selector(clearBtnActionInGSButtonVC:)]) {
@@ -63,14 +64,14 @@
     }
     
 }
-
+//The FOCUS button
 - (IBAction)focusMapBtnAction:(id)sender {
     
     if ([_delegate respondsToSelector:@selector(focusMapBtnActionInGSButtonVC:)]) {
         [_delegate focusMapBtnActionInGSButtonVC:self];
     }
 }
-
+//The EDIT button
 - (IBAction)editBtnAction:(id)sender {
     
     [self setMode:DJIGSViewMode_EditMode];
@@ -79,14 +80,14 @@
     }
     
 }
-
+//The START button
 - (IBAction)startBtnAction:(id)sender {
     
     if ([_delegate respondsToSelector:@selector(startBtnActionInGSButtonVC:)]) {
         [_delegate startBtnActionInGSButtonVC:self];
     }
 }
-
+//The ADD button to add waypoints to the map
 - (IBAction)addBtnAction:(id)sender {
     
     if ([_delegate respondsToSelector:@selector(addBtn:withActionInGSButtonVC:)]) {
@@ -94,7 +95,7 @@
     }
     
 }
-
+// The CONFIG button to change the settings for the mission
 - (IBAction)configBtnAction:(id)sender {
     
     if ([_delegate respondsToSelector:@selector(configBtnActionInGSButtonVC:)]) {

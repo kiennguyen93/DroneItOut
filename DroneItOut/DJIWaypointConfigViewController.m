@@ -36,14 +36,14 @@
     [self.headingSegmentedControl setSelectedSegmentIndex:0]; //Set the headingMode to DJIWaypointMissionHeadingAuto
     
 }
-
+//The CANCEL button to cancel the waypoint mission
 - (IBAction)cancelBtnAction:(id)sender {
  
     if ([_delegate respondsToSelector:@selector(cancelBtnActionInDJIWaypointConfigViewController:)]) {
         [_delegate cancelBtnActionInDJIWaypointConfigViewController:self];
     }
 }
-
+//The FINISH button to upload the mission to the drone
 - (IBAction)finishBtnAction:(id)sender {
     
     if ([_delegate respondsToSelector:@selector(finishBtnActionInDJIWaypointConfigViewController:)]) {
@@ -52,15 +52,15 @@
     
 }
 
-
+//The ALTITUDE edit button
 - (IBAction)altitudeDismiss:(id)sender {
     [altitude resignFirstResponder];
 }
-
+//The SPEED edit button
 - (IBAction)autoFlightSpeedDismiss:(id)sender {
      [autoFlightSpeed resignFirstResponder];
 }
-
+//The MAX SPEED edit button
 - (IBAction)maxSpeedDismiss:(id)sender {
      [maxSpeed resignFirstResponder];
 }

@@ -26,6 +26,7 @@
     return self;
 }
 
+//Add waypoints to the map
 - (void)addPoint:(CGPoint)point withMapView:(MKMapView *)mapView
 {
     
@@ -38,6 +39,7 @@
 
 }
 
+//Delete all waypoints
 - (void)cleanAllPointsWithMapView:(MKMapView *)mapView
 {
     [_editPoints removeAllObjects];
@@ -57,6 +59,7 @@
     return self.editPoints;
 }
 
+//Zoom in to the current location once the aircraft is connected
 -(void)updateAircraftLocation:(CLLocationCoordinate2D)location withMapView:(MKMapView *)mapView
 {
     if (self.aircraftAnnotation == nil) {
@@ -67,6 +70,7 @@
     [self.aircraftAnnotation setCoordinate:location];
 }
 
+//Update the direction of the aircraft
 -(void)updateAircraftHeading:(float)heading
 {
     if (self.aircraftAnnotation) {
