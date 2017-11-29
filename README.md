@@ -1,6 +1,6 @@
-#Drone It Out
+# Drone It Out
 
-##What is this?
+## What is this?
 Autopilot App for DJI Phantom 3
 
 DroneItOut is an app that enables you to automate your DJI Product. You can control flight throught three main modes, waypoints mission, follow me, and voice control and many subsystems of the product including the camera and gimbal. Using the DroneItOut app, you will discover the full potential of DJI products.
