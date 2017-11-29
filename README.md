@@ -50,8 +50,13 @@ installed.
 > pod install
 > ~~~
 ### Run the App
-Before you run the app, you need to power on the aircraft and remote controller. On your device, you need to connect DJI wireless network. You should wait in 20s for the reomote controller to connect with the aircraft. The green line on remote controller indicates that it's connected sucessfully. You will see the name of the wifi network like ***"Phantom3.."*** on you wireless list setting. 
+Before you run the app, you need to power on the aircraft and remote controller. 
+
+On your device, you need to connect DJI wireless network. You should wait in 20s for the reomote controller to connect with the aircraft. The green line on remote controller indicates that it's connected sucessfully. 
+
+You will see the name of the wifi network like ***"Phantom3.."*** on you wireless list setting. 
 To connect that wifi network, you can use the default password ***"12341234"***
+
 One more thing, make sure that the camera and the memory card are attached to the aircraft. Those component will be required to the applicaiton. 
 
 ## Learn More about DJI Products and the Mobile SDK
