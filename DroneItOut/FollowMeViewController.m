@@ -30,18 +30,21 @@
 
 @implementation FollowMeViewController
 
+//Start updating GPS location when Follow Me View is called
 - (void)viewWillAppear:(BOOL)animated
 {
     [self startUpdateLocation];
     [super viewWillAppear:animated];
 }
 
+//Follow Me cleanup when view is closed
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
     [self.locationManager stopUpdatingLocation];
 }
 
+//Follow Me view initialization. Calls regester app and initializes data
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -50,12 +53,14 @@
 }
 
 #pragma mark Init Methods
+//Sets user's and drone's locations
 -(void)initData
 {
     self.userLocation = kCLLocationCoordinate2DInvalid;
     self.droneLocation = kCLLocationCoordinate2DInvalid;
 }
 
+//Registers the drone to the app
 -(void) registerApp
 {
     //Please enter your App key in the info.plist file to register the app.
@@ -63,6 +68,7 @@
 }
 
 #pragma mark DJISDKManagerDelegate Methods
+//Gives an error message to the user if Drone fails to connect to the app
 - (void)appRegisteredWithError:(NSError *)error
 {
     if (error)
@@ -80,6 +86,7 @@
     }
 }
 
+//Initializes drone controller if drone is successfully connected
 - (void)productConnected:(DJIBaseProduct *)product
 {
     if (product)
@@ -97,16 +104,17 @@
     
     //If this demo is used in China, it's required to login to your DJI account to activate the application. Also you need to use DJI Go app to bind the aircraft to your DJI account. For more details, please check this demo's tutorial.
     [[DJISDKManager userAccountManager] logIntoDJIUserAccountWithAuthorizationRequired:NO withCompletion:^(DJIUserAccountState state, NSError * _Nullable error)
-    {
-        if (error)
-        {
-            NSLog(@"Login failed: %@", error.description);
-        }
-    }];
+     {
+         if (error)
+         {
+             NSLog(@"Login failed: %@", error.description);
+         }
+     }];
     
 }
 
 #pragma mark action Methods
+//Returns a Follow Me Mission Operator
 -(DJIFollowMeMissionOperator *)missionOperator
 {
     return [DJISDKManager missionControl].followMeMissionOperator;
@@ -120,6 +128,7 @@
     [self presentViewController:alert animated:YES completion:nil];
 }
 
+//Initializes a Follow Me Mission with necessary parameters
 -(void) initializeMission
 {
     self.followMeOperator = [self missionOperator];
@@ -128,37 +137,39 @@
     self.followMeMission.heading = DJIFollowMeHeadingTowardFollowPosition;
 }
 
+//Starts the Follow Me Mission. Activated by the GUI start button
 - (IBAction)startFollowMe:(UIButton *)sender
 {
     [self initializeMission];
     [self.followMeOperator startMission:self.followMeMission withCompletion:^(NSError * _Nullable error)
-    {
-        if (error)
-        {
-            ShowMessage(@"Start Mission Failed", error.description, nil, @"OK");
-        }
-        else
-        {
-            ShowMessage(@"", @"Mission Started", nil, @"OK");
-        }
-    }];
+     {
+         if (error)
+         {
+             ShowMessage(@"Start Mission Failed", error.description, nil, @"OK");
+         }
+         else
+         {
+             ShowMessage(@"", @"Mission Started", nil, @"OK");
+         }
+     }];
     [self startUpdateTimer];
 }
 
+//Ends the Follow Me Mission. Activated by the GUI stop button
 - (IBAction)stopFollowMe:(UIButton *)sender
 {
     [self.followMeOperator stopMissionWithCompletion:^(NSError * _Nullable error)
-    {
-        if (error)
-        {
-            NSString* failedMessage = [NSString stringWithFormat:@"Stop Mission Failed: %@", error.description];
-            ShowMessage(@"", failedMessage, nil, @"OK");
-        }
-        else
-        {
-            [self stopUpdateTimer];
-        }
-    }];
+     {
+         if (error)
+         {
+             NSString* failedMessage = [NSString stringWithFormat:@"Stop Mission Failed: %@", error.description];
+             ShowMessage(@"", failedMessage, nil, @"OK");
+         }
+         else
+         {
+             [self stopUpdateTimer];
+         }
+     }];
 }
 
 //Use timer for updating the coordinate, letting frequency be 10Hz
@@ -172,6 +183,7 @@
     [self.updateTimer fire];
 }
 
+//Pauses the coordinate update timer, for future utility
 -(void) pauseUpdateTimer
 {
     if (self.updateTimer)
@@ -180,6 +192,7 @@
     }
 }
 
+//Resumes the coordinate update timer from a paused state, for future utility
 -(void) resumeUpdateTimer
 {
     if (self.updateTimer)
@@ -188,6 +201,7 @@
     }
 }
 
+//Stops the coordinate update timer
 -(void) stopUpdateTimer
 {
     if (self.updateTimer)
@@ -197,6 +211,7 @@
     }
 }
 
+//Updates the Follow Me Mission coordinates whenever the timer is fired
 -(void) onUpdateTimerTicked:(id)sender
 {
     [self.followMeOperator updateFollowMeCoordinate:self.userLocation];
@@ -208,6 +223,7 @@
 }
 
 #pragma mark CLLocation Methods
+//Starts the location manager updating user's GPS location
 -(void) startUpdateLocation
 {
     if ([CLLocationManager locationServicesEnabled])
@@ -232,21 +248,23 @@
 }
 
 #pragma mark DJIFlightControllerDelegate
+//Returns a flight controller for the drone
 - (void)flightController:(DJIFlightController *)fc didUpdateState:(DJIFlightControllerState *)state
 {
     self.droneLocation = state.aircraftLocation.coordinate;
 }
 
 #pragma mark - CLLocationManagerDelegate
+//Returns a location manager
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
 {
     CLLocation* location = [locations lastObject];
     self.userLocation = location.coordinate;
 }
 
+//Sets the drones location. For future use
 -(void)setAircraftLocation:(CLLocationCoordinate2D)aircraftLocation
 {
-    
 }
 
 - (void) callStartFollowMe
