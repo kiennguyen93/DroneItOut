@@ -9,8 +9,6 @@
 import UIKit
 import DJISDK
 
-
-
 protocol DJIProductObjectProtocol {
     func fetchAircraft() -> DJIAircraft?
     func fetchCamera() -> DJICamera?
@@ -28,6 +26,7 @@ class ConnectedProductManager: DJIProductObjectProtocol {
     var connectedProduct:DJIBaseProduct? = nil
     var product = DJISDKManager.product()
     
+    //return product
     func fetchAircraft() -> DJIAircraft? {
         if (product == nil) {
             return nil
@@ -38,6 +37,7 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         return nil
     }
     
+    //return camera component
     func fetchCamera() -> DJICamera? {
         if (self.connectedProduct == nil) {
             return nil
@@ -51,7 +51,7 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         
         return nil
     }
-    
+    //return Gimbal from product
     func fetchGimbal() -> DJIGimbal? {
         if (self.connectedProduct == nil) {
             return nil
@@ -62,10 +62,9 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         else if (self.connectedProduct is DJIHandheld) {
             return (self.connectedProduct as! DJIHandheld).gimbal
         }
-        
         return nil
     }
-    
+    //return flight controller from product
     func fetchFlightController() -> DJIFlightController? {
         
         if (product == nil) {
@@ -76,7 +75,7 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         }
         return nil
     }
-    
+    //return remote controller from product
     func fetchRemoteController() -> DJIRemoteController? {
         if (self.connectedProduct == nil) {
             return nil
@@ -86,7 +85,7 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         }
         return nil
     }
-    
+    //this function will return battery property, you can use it to check battery status
     func fetchBattery() -> DJIBattery? {
         if (self.connectedProduct == nil) {
             return nil
@@ -100,7 +99,7 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         
         return nil
     }
-    
+    //return airlink property
     func fetchAirLink() -> DJIAirLink? {
         if (product == nil) {
             return nil
@@ -114,7 +113,6 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         
         return nil
     }
-    
     func fetchHandheldController() -> DJIHandheldController? {
         if (product == nil) {
             return nil
@@ -124,12 +122,13 @@ class ConnectedProductManager: DJIProductObjectProtocol {
         }
         return nil
     }
-    
+    //set delegation to product
     func setDelegate(delegate:DJIBaseProductDelegate?) {
         product?.delegate = delegate
     }
     
 }
+//we use this class to connect the aircraft
 class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProductObjectProtocol {
     
     var connectedProduct:DJIBaseProduct?=nil
@@ -140,10 +139,7 @@ class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProduc
         if (moduleTitle != nil) {
             self.title = moduleTitle
         }
-        
-        // Do any additional setup after loading the view.
     }
-    
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -152,7 +148,6 @@ class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProduc
             ConnectedProductManager.sharedInstance.setDelegate(delegate: self)
         }
     }
-    
     override func viewWillDisappear(
         _ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -161,19 +156,16 @@ class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProduc
             ConnectedProductManager.sharedInstance.setDelegate(delegate: nil)
         }
     }
-    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
-    
+    //call product manager to set delegate
     func product(product: DJIBaseProduct, connectivityChanged isConnected: Bool) {
         if isConnected {
             NSLog("\(String(describing: product.model)) connected. ")
             connectedProduct = product
             ConnectedProductManager.sharedInstance.product = product
             ConnectedProductManager.sharedInstance.setDelegate(delegate: self)
-            
         }
         else {
             NSLog("Product disconnected. ")
@@ -208,8 +200,7 @@ class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProduc
         }
         
     }
-    
-    
+    //this function helps us show message on UI with Ok button
     func showAlertResult(info:String) {
         // create the alert
         var message:String? = info
@@ -218,7 +209,6 @@ class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProduc
             message = "success"
         }
         
-       
         let alert = UIAlertController(title: "Message", message: "\(message ?? "")", preferredStyle: .alert)
         // add an action (button)
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -231,7 +221,6 @@ class DJIBaseViewController: UIViewController, DJIBaseProductDelegate, DJIProduc
             }
         }
     }
-    
     
     func fetchAircraft() -> DJIAircraft?{
         return ConnectedProductManager.sharedInstance.fetchAircraft()
