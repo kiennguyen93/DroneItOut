@@ -302,6 +302,13 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         if strArr[0] == "check" {
             strArr[0] = "take"
         }
+        if strArr[0] == "factory" {
+            strArr[0] = "path"
+            strArr.append("3")
+        }
+        if strArr[0] == "at" || strArr[0] == "talk" || strArr[0] == "bought" || strArr[0] == "but" || strArr[0] == "back" || strArr[0] == "that"{
+            strArr[0] = "path"
+        }
         if strArr.count == 2 || strArr.count == 3{
             
             switch strArr[1] {
@@ -387,13 +394,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 commandText.text = str
                 missionOperator?.removeAllListeners()
             }
-            if str == "waypoints" || str == "execute" {
-                //set to label
-                commandText.text = str
-                predefinedPath()
-            }
-            //say "back" to back to VoiceViewController
-            if str == "homepage" {
+                //say "back" to back to VoiceViewController
+            else if str == "homepage" {
                 let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "DJIRootViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
             }
@@ -422,6 +424,22 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
                 let newViewController = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "VoiceViewController")
                 UIApplication.topViewController()?.present(newViewController, animated: true, completion: nil)
             }
+            else if strArr[0] == "path"  && strArr[1] == "1"{
+                //set to label
+                commandText.text = "predefined path 1"
+                predefinedPath()
+            }
+            else if strArr[0] == "path" && strArr[1] == "2"{
+                //set to label
+                commandText.text = "predefined path 2"
+                predefinedPath2()
+            }
+            else if strArr[0] == "path" && strArr[1] == "3"{
+                //set to label
+                commandText.text = "predefined path 3"
+                predefinedPath3()
+            }
+           
             else {
                 self.showAlertResult(info: "Command not found, say your next command!")
             }
@@ -436,6 +454,8 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
     //******** RUN COMMANDS METHODS **********//
     func predefinedPath() {
         disableVirtualStickModeSaid()
+        //remove all waypoints first
+        waypointMission.removeAllWaypoints()
         firstWaypoint()
         //add second waypoint
         let loc2 = CLLocationCoordinate2DMake(lat, long)
@@ -522,6 +542,236 @@ class PredefinedPathViewController:  DJIBaseViewController, DJISDKManagerDelegat
         waypointMission.add(wpoint6)
         waypointMission.add(wpoint7)
         waypointMission.add(wpoint8)
+        
+        //prepareMission before execute
+        //prepareMission(missionName: waypointMission)
+        
+        executeMission()
+    }
+    func predefinedPath2() {
+        disableVirtualStickModeSaid()
+        //remove all waypoints first
+        waypointMission.removeAllWaypoints()
+        firstWaypoint()
+        
+        //add second waypoint ( go up diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc2 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint2 = DJIWaypoint(coordinate: loc2)
+        wpoint2.altitude = Float((droneFirstLocation?.altitude)! + 2)
+        wpoint2.heading = 0
+        wpoint2.actionTimeoutInSeconds = 60
+        wpoint2.cornerRadiusInMeters = 1
+        wpoint2.gimbalPitch = 0
+        
+        
+        //add third waypoint, (go down diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc3 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint3 = DJIWaypoint(coordinate: loc3)
+        wpoint3.altitude =  wpoint2.altitude - 2
+        wpoint3.heading = 0
+        wpoint3.actionTimeoutInSeconds = 60
+        wpoint3.cornerRadiusInMeters = 1
+        wpoint3.gimbalPitch = 0
+        
+        
+        //add 4th waypoint (go up diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc4 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint4 = DJIWaypoint(coordinate: loc4)
+        wpoint4.altitude =  wpoint3.altitude + 2
+        wpoint4.heading = 0
+        wpoint4.actionTimeoutInSeconds = 60
+        wpoint4.cornerRadiusInMeters = 1
+        wpoint4.gimbalPitch = 0
+        
+        
+        //add 5th waypoint (go down diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc5 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint5 = DJIWaypoint(coordinate: loc5)
+        wpoint5.altitude =  wpoint4.altitude - 2
+        wpoint5.heading = 0
+        wpoint5.actionTimeoutInSeconds = 60
+        wpoint5.cornerRadiusInMeters = 1
+        wpoint5.gimbalPitch = 0
+        
+        //add 6th waypoint (go up diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc6 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint6 = DJIWaypoint(coordinate: loc6)
+        wpoint6.altitude =  wpoint5.altitude + 2
+        wpoint6.heading = 0
+        wpoint6.actionTimeoutInSeconds = 60
+        wpoint6.cornerRadiusInMeters = 1
+        wpoint6.gimbalPitch = 0
+        
+        //add 7th waypoint (go down diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc7 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint7 = DJIWaypoint(coordinate: loc7)
+        wpoint7.altitude = wpoint6.altitude - 2
+        wpoint7.heading = 0
+        wpoint7.actionTimeoutInSeconds = 60
+        wpoint7.cornerRadiusInMeters = 1
+        wpoint7.gimbalPitch = 0
+        
+        //add 8th waypoint (go up diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc8 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint8 = DJIWaypoint(coordinate: loc8)
+        wpoint8.altitude =  wpoint7.altitude + 2
+        wpoint8.heading = 0
+        wpoint8.actionTimeoutInSeconds = 60
+        wpoint8.cornerRadiusInMeters = 1
+        wpoint8.gimbalPitch = 0
+        
+        //add 9th waypoint (go down diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc9 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint9 = DJIWaypoint(coordinate: loc9)
+        wpoint9.altitude =  wpoint8.altitude - 2
+        wpoint9.heading = 0
+        wpoint9.actionTimeoutInSeconds = 60
+        wpoint9.cornerRadiusInMeters = 1
+        wpoint9.gimbalPitch = 0
+        
+        //add 10th waypoint (go down diagonally)
+        lat = lat + (myPointOffset/5)
+        let loc10 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint10 = DJIWaypoint(coordinate: loc10)
+        wpoint10.altitude =  wpoint9.altitude + 2
+        wpoint10.heading = 0
+        wpoint10.actionTimeoutInSeconds = 60
+        wpoint10.cornerRadiusInMeters = 1
+        wpoint10.gimbalPitch = 0
+        
+        //add waypoints to mission
+        waypointMission.add(wpoint2)
+        waypointMission.add(wpoint3)
+        waypointMission.add(wpoint4)
+        waypointMission.add(wpoint5)
+        waypointMission.add(wpoint6)
+        waypointMission.add(wpoint7)
+        waypointMission.add(wpoint8)
+        waypointMission.add(wpoint9)
+        waypointMission.add(wpoint10)
+        
+        //prepareMission before execute
+        //prepareMission(missionName: waypointMission)
+        
+        executeMission()
+        
+    }
+    func predefinedPath3() {
+        disableVirtualStickModeSaid()
+        //remove all waypoints first
+        waypointMission.removeAllWaypoints()
+        firstWaypoint()
+        //add second waypoint( go right diagonally)
+        lat = lat + myPointOffset
+        let loc2 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint2 = DJIWaypoint(coordinate: loc2)
+        wpoint2.altitude = Float((droneFirstLocation?.altitude)! - 1)
+        wpoint2.heading = 0
+        wpoint2.actionTimeoutInSeconds = 60
+        wpoint2.cornerRadiusInMeters = 5
+        wpoint2.gimbalPitch = 0
+        
+        
+        //add third waypoint, (go left diagonally)
+        lat = lat - myPointOffset
+        let loc3 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint3 = DJIWaypoint(coordinate: loc3)
+        wpoint3.altitude =  wpoint2.altitude - 1
+        wpoint3.heading = 0
+        wpoint3.actionTimeoutInSeconds = 60
+        wpoint3.cornerRadiusInMeters = 5
+        wpoint3.gimbalPitch = 0
+        
+        
+        //add 4th waypoint (go right diagonally)
+        lat = lat +  myPointOffset
+        let loc4 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint4 = DJIWaypoint(coordinate: loc4)
+        wpoint4.altitude =  wpoint3.altitude - 1
+        wpoint4.heading = 0
+        wpoint4.actionTimeoutInSeconds = 60
+        wpoint4.cornerRadiusInMeters = 5
+        wpoint4.gimbalPitch = 0
+        
+        
+        //add 5th waypoint (go left diagonally)
+        lat = lat - myPointOffset
+        let loc5 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint5 = DJIWaypoint(coordinate: loc5)
+        wpoint5.altitude =  wpoint4.altitude - 1
+        wpoint5.heading = 0
+        wpoint5.actionTimeoutInSeconds = 60
+        wpoint5.cornerRadiusInMeters = 5
+        wpoint5.gimbalPitch = 0
+        
+        //add 6th waypoint (go right diagonally)
+        lat = lat + myPointOffset
+        let loc6 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint6 = DJIWaypoint(coordinate: loc6)
+        wpoint6.altitude =  wpoint5.altitude - 1
+        wpoint6.heading = 0
+        wpoint6.actionTimeoutInSeconds = 60
+        wpoint6.cornerRadiusInMeters = 5
+        wpoint6.gimbalPitch = 0
+        
+        //add 7th waypoint (go left diagonally)
+        lat = lat - myPointOffset
+        let loc7 = CLLocationCoordinate2DMake(lat , long)
+        let wpoint7 = DJIWaypoint(coordinate: loc7)
+        wpoint7.altitude = wpoint6.altitude - 1
+        wpoint7.heading = 0
+        wpoint7.actionTimeoutInSeconds = 60
+        wpoint7.cornerRadiusInMeters = 5
+        wpoint7.gimbalPitch = 0
+        
+        //add 8th waypoint (go right diagonally)
+        lat = lat + myPointOffset
+        let loc8 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint8 = DJIWaypoint(coordinate: loc8)
+        wpoint8.altitude =  wpoint7.altitude - 1
+        wpoint8.heading = 0
+        wpoint8.actionTimeoutInSeconds = 60
+        wpoint8.cornerRadiusInMeters = 5
+        wpoint8.gimbalPitch = 0
+        
+        //add 9th waypoint (go left diagonally)
+        lat = lat - myPointOffset
+        let loc9 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint9 = DJIWaypoint(coordinate: loc9)
+        wpoint9.altitude =  wpoint8.altitude - 1
+        wpoint9.heading = 0
+        wpoint9.actionTimeoutInSeconds = 60
+        wpoint9.cornerRadiusInMeters = 5
+        wpoint9.gimbalPitch = 0
+        
+        //add 10th waypoint (go right diagonally)
+        lat = lat + myPointOffset
+        let loc10 = CLLocationCoordinate2DMake(lat, long)
+        let wpoint10 = DJIWaypoint(coordinate: loc10)
+        wpoint10.altitude =  wpoint9.altitude - 1
+        wpoint10.heading = 0
+        wpoint10.actionTimeoutInSeconds = 60
+        wpoint10.cornerRadiusInMeters = 5
+        wpoint10.gimbalPitch = 0
+        
+        //add waypoints to mission
+        waypointMission.add(wpoint2)
+        waypointMission.add(wpoint3)
+        waypointMission.add(wpoint4)
+        waypointMission.add(wpoint5)
+        waypointMission.add(wpoint6)
+        waypointMission.add(wpoint7)
+        waypointMission.add(wpoint8)
+        waypointMission.add(wpoint9)
+        waypointMission.add(wpoint10)
         
         //prepareMission before execute
         //prepareMission(missionName: waypointMission)
