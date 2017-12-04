@@ -23,7 +23,7 @@ The process may take a long time, please wait. For further installation instruct
 
 **2.** Install SDK with CocoaPods in the Project
 
-Run the following command in the **ObjcSampleCode** and **SwiftSampleCode** paths:
+Run the following command in the **DroneItOut** paths:
 
 ~~~
 pod install
@@ -35,11 +35,12 @@ If you install it successfully, you should get the messages similar to the follo
 Analyzing dependencies
 Downloading dependencies
 Installing DJI-SDK-iOS (4.3.2)
+Installing SpeechKit (2.2.2)
 Generating Pods project
 Integrating client project
 
-[!] Please close any current Xcode sessions and use `DJISdkDemo.xcworkspace` for this project from now on.
-Pod installation complete! There is 1 dependency from the Podfile and 1 total pod
+[!] Please close any current Xcode sessions and use `DroneItOut.xcworkspace` for this project from now on.
+Pod installation complete! There is 2 dependencies from the Podfile and 2 total pod
 installed.
 ~~~
 
@@ -56,7 +57,7 @@ Next, The user can connect their iPhone or iPad to Xcode and have the applicatio
 
 Before running the app, the user needs to turn the aircraft and the controller on. The user needs to wait for the green light on the controller, which indicates a successful connection between the drone and the controller. After the the drone has been warmed up, the user can connect to the drone's wireless network.
 
-On the mobile device, the user needs to connect  to the drone's wireless network. The name of the network usually starts with ***"Phantom3....."*** . The default password for the network is ***12341234***.
+On the mobile device, the user needs to connect  to the drone's wireless network. The name of the network usually starts with ***"Phantom3_....."*** . The default password for the network is ***12341234***.
 
 Last but not least, make sure that the camera and the memory card are attached to the aircraft. Those component are required for capturing pictures and videos.
 
