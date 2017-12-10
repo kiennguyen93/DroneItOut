@@ -628,19 +628,19 @@ class VoiceViewController:  DJIBaseViewController, DJISDKManagerDelegate, SKTran
         
         //if units are in meters
         //convert all unit to GPS coordinate points
-        if dir == "east" || dir == "up"{
+        if dir == "north" || dir == "up"{
             //long = long + convertMetersToPoint(m: dist)
             ALTITUDE = Float(droneLocation0.altitude) + Float(dist)
         }
-        if dir == "west" || dir == "down" {
+        if dir == "south" || dir == "down" {
             //long = long - convertMetersToPoint(m: dist)
             ALTITUDE = Float(droneLocation0.altitude) - Float(dist)
         }
-        if dir == "noth" || dir == "right"{
+        if dir == "east" || dir == "right"{
             lat = lat + convertMetersToPointLat(m: dist)
             ALTITUDE = Float(droneLocation0.altitude)
         }
-        if dir == "south" || dir == "left"{
+        if dir == "west" || dir == "left"{
             lat = lat - convertMetersToPointLat(m: dist)
             ALTITUDE = Float(droneLocation0.altitude)
         }
